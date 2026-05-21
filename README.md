@@ -1,59 +1,138 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Multi Plastik CMS — Laravel 12
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+CMS untuk website Multi Plastik. Semua konten (slider, brand, kategori, produk, news, pengaturan, SEO, analytics, iklan) bisa diedit dari panel admin.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Isi Paket
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```
+app/
+  Http/Controllers/Admin/   → semua controller panel admin
+  Http/Controllers/Site/    → controller frontend
+  Http/Middleware/          → AdminOnly, TrackVisit (analytics)
+  Models/                   → Brand, Category, Product, News, Slide, Promo, SiteSetting, PageVisit, User
+  Providers/                → AppServiceProvider, ViewServiceProvider
+  helpers.php               → fungsi setting(), media_url(), wa_link()
+bootstrap/
+  app.php                   → registrasi middleware
+  providers.php             → registrasi provider
+database/
+  migrations/               → 1 file migrasi semua tabel
+  seeders/                  → data awal dari template (brand, produk, news, settings)
+public/
+  css/site.css              → CSS frontend (dari template)
+  uploads/                  → folder upload gambar
+resources/views/
+  admin/                    → semua halaman panel admin
+  site/                     → semua halaman frontend (home, brand, produk, news, dll)
+routes/
+  web.php                   → semua route
+.env.example
+composer.json
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Cara Pasang ke Laravel 12 Fresh
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 1. Buat project Laravel 12 baru (jika belum ada)
+```bash
+composer create-project laravel/laravel multiplastik
+cd multiplastik
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Copy semua file dari paket ini
+Timpa / merge file ke project. Yang penting:
+- `app/` → merge (jangan hapus file bawaan, cukup tambah/timpa yang ada di paket)
+- `bootstrap/app.php` dan `bootstrap/providers.php` → timpa
+- `database/migrations/` → copy file migrasi
+- `database/seeders/` → timpa DatabaseSeeder + copy ProductCatalogSeeder
+- `public/css/`, `public/uploads/` → copy
+- `resources/views/` → copy folder `admin` dan `site`
+- `routes/web.php` → timpa
+- `composer.json` → timpa (atau tambahkan bagian `autoload.files` saja)
 
-## Laravel Sponsors
+### 3. Setup database
+Buat database MySQL bernama `multiplastik`, lalu:
+```bash
+cp .env.example .env        # kalau belum ada .env
+php artisan key:generate
+```
+Edit `.env` sesuaikan `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 4. Reload autoload (penting untuk helpers.php)
+```bash
+composer dump-autoload
+```
 
-### Premium Partners
+### 5. Migrasi + seed data awal
+```bash
+php artisan migrate --seed
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 6. Buat symlink storage (opsional, kalau pakai storage)
+Folder upload sudah pakai `public/uploads`, jadi tidak wajib. Pastikan folder writable:
+```bash
+chmod -R 775 public/uploads
+```
 
-## Contributing
+### 7. Jalankan
+```bash
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Akses
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Halaman | URL |
+|---|---|
+| Website | `http://localhost:8000` |
+| Admin Login | `http://localhost:8000/admin/login` |
 
-## Security Vulnerabilities
+**Login default:**
+- Email: `admin@multiplastik.com`
+- Password: `admin123`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+> Ganti password setelah login pertama via menu **User Admin**.
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Fitur Panel Admin
+
+- **Dashboard** — ringkasan kunjungan + grafik 7 hari
+- **Analytics** — kunjungan per hari, device, referrer, dan traffic iklan (UTM)
+- **Hero Slider** — kelola slide di homepage
+- **Promo Bar** — teks marquee berjalan
+- **News & Artikel** — CRUD artikel (konten HTML)
+- **Brand / Kategori / Produk** — katalog bertingkat, dengan spesifikasi & gallery
+- **Site Settings** — Umum/SEO, Kontak, Section Tentang, Keunggulan, Hero Stats, Embed Sosmed, Analytics, Iklan
+- **User Admin** — kelola akun admin
+
+---
+
+## Analytics, Meta Ads & Google Ads
+
+Masuk **Admin → Site Settings**:
+
+- Tab **Analytics**: isi Google Analytics 4 (`G-XXX`), Google Tag Manager (`GTM-XXX`), Meta Pixel ID, TikTok Pixel ID. Script otomatis terpasang di semua halaman.
+- Tab **Iklan**: isi Google Ads Conversion ID (`AW-XXX`), atau tempel custom script.
+
+**Tracking pengunjung internal** (tanpa tool eksternal) sudah otomatis lewat middleware `TrackVisit` — tercatat di menu Analytics, termasuk parameter UTM dari link iklan:
+```
+https://multiplastik.com/?utm_source=meta&utm_medium=cpc&utm_campaign=promo-2025
+```
+
+---
+
+## Catatan Teknis
+
+- **Upload gambar**: setiap form gambar bisa upload file ATAU paste URL (mis. Cloudinary). Data seed pakai URL Cloudinary yang sudah ada.
+- **Spesifikasi produk**: format per baris `Label|Value` (contoh: `Ukuran|12 Oz`).
+- **Link tombol slider**: `nav:brands`, `nav:brand:hok-cup`, `wa`, atau URL biasa.
+- **Cache settings**: nilai settings di-cache; otomatis ter-clear saat disimpan dari admin.
+- **Frontend multi-page**: tiap brand/kategori/produk/artikel punya URL sendiri (SEO friendly).
+
+URL produk: `/brand/{brand}/{kategori}/{produk}`
+Contoh: `/brand/hok-cup/gelas-natural/hc-natural-12oz`

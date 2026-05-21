@@ -10,9 +10,18 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+        // alias
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminOnly::class,
+            'track-visit' => \App\Http\Middleware\TrackVisit::class,
+        ]);
+
+        // append ke web group supaya tracking otomatis di semua halaman frontend
+        $middleware->web(append: [
+            \App\Http\Middleware\TrackVisit::class,
+        ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
