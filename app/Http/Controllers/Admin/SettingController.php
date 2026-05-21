@@ -12,7 +12,8 @@ class SettingController extends Controller
     public function index(string $group = 'general')
     {
         $groups = $this->groupConfig();
-        if (!isset($groups[$group])) abort(404);
+        if (!isset($groups[$group]))
+            abort(404);
 
         $fields = $groups[$group];
         $values = SiteSetting::whereIn('key', array_keys($fields))
@@ -25,7 +26,8 @@ class SettingController extends Controller
     public function update(Request $request, string $group)
     {
         $groups = $this->groupConfig();
-        if (!isset($groups[$group])) abort(404);
+        if (!isset($groups[$group]))
+            abort(404);
 
         $fields = $groups[$group];
 
@@ -59,6 +61,21 @@ class SettingController extends Controller
     public function groupConfig(): array
     {
         return [
+            'seo' => [
+                'seo_og_title' => ['label' => 'OG Title (override judul untuk share)', 'type' => 'text'],
+                'seo_og_description' => ['label' => 'OG Description (override meta desc untuk share)', 'type' => 'textarea'],
+                'seo_og_image' => ['label' => 'OG Image (gambar preview share sosmed)', 'type' => 'image'],
+                'seo_twitter_card' => ['label' => 'Twitter Card Type', 'type' => 'text', 'help' => 'summary_large_image atau summary'],
+                'seo_twitter_site' => ['label' => 'Twitter @username', 'type' => 'text', 'help' => 'contoh: @multiplastik'],
+                'seo_robots' => ['label' => 'Meta Robots', 'type' => 'text', 'help' => 'index, follow (default) — ubah ke noindex jika perlu'],
+                'seo_canonical_base' => ['label' => 'Canonical Base URL', 'type' => 'text', 'help' => 'contoh: https://multiplastik.com — tanpa trailing slash'],
+                'seo_sitemap_active' => ['label' => 'Aktifkan Sitemap (/sitemap.xml)', 'type' => 'text', 'help' => '1 = aktif, 0 = nonaktif'],
+                'seo_schema_name' => ['label' => 'Schema Organization Name', 'type' => 'text'],
+                'seo_schema_phone' => ['label' => 'Schema Telephone', 'type' => 'text', 'help' => 'contoh: +6281234567890'],
+                'seo_schema_area' => ['label' => 'Schema Area Served', 'type' => 'text', 'help' => 'contoh: Surabaya, Jawa Timur, Indonesia'],
+                'seo_google_verify' => ['label' => 'Google Search Console Verification', 'type' => 'text', 'help' => 'Isi content dari tag <meta name="google-site-verification">'],
+                'seo_bing_verify' => ['label' => 'Bing Webmaster Verification', 'type' => 'text'],
+            ],
             'general' => [
                 'site_title' => ['label' => 'Judul Website', 'type' => 'text'],
                 'site_description' => ['label' => 'Deskripsi (meta)', 'type' => 'textarea'],

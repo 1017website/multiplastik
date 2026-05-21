@@ -7,7 +7,32 @@
     <title>@yield('title', setting('site_title', 'Multi Plastik'))</title>
     <meta name="description" content="@yield('meta_description', setting('site_description'))" />
     <meta name="keywords" content="{{ setting('site_keywords') }}" />
-    <meta name="robots" content="index, follow" />
+    @php
+        $seoRobots = setting('seo_robots', 'index, follow');
+        $seoTwitter = setting('seo_twitter_card');
+        $seoTwitterSite = setting('seo_twitter_site');
+        $seoGVerify = setting('seo_google_verify');
+        $seoBingVerify = setting('seo_bing_verify');
+        $seoOgImage = setting('seo_og_image') ?: setting('og_image');
+    @endphp
+    <meta name="robots" content="{{ $seoRobots }}" />
+    @if ($seoTwitter)
+        <meta name="twitter:card" content="{{ $seoTwitter }}" />
+        <meta name="twitter:title" content="@yield('title', setting('site_title'))" />
+        <meta name="twitter:description" content="@yield('meta_description', setting('site_description'))" />
+        @if ($seoOgImage)
+            <meta name="twitter:image" content="{{ media_url($seoOgImage) }}" />
+        @endif
+        @if ($seoTwitterSite)
+            <meta name="twitter:site" content="{{ $seoTwitterSite }}" />
+        @endif
+    @endif
+    @if ($seoGVerify)
+        <meta name="google-site-verification" content="{{ $seoGVerify }}" />
+    @endif
+    @if ($seoBingVerify)
+        <meta name="msvalidate.01" content="{{ $seoBingVerify }}" />
+    @endif
     <link rel="canonical" href="{{ url()->current() }}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="@yield('title', setting('site_title'))" />
@@ -40,7 +65,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="{{ asset('css/site.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/site-extra.css') }}" />
-    <script src="https://elfsightcdn.com/platform.js" async></script>
+    <style>
+        /* Nav fix: pastikan nav-center tidak wrap */
+        .nav-center {
+            flex-wrap: nowrap;
+        }
+
+        #mainNav .nav-right {
+            gap: 12px;
+        }
+    </style>
+    <script src="https://elfsightcdn.com/platform.js" defer></script>
 
     @include('site.partials.tracking-head')
     @stack('styles')
@@ -51,29 +86,26 @@
 
     <!-- ==================== NAV ==================== -->
     <nav id="mainNav">
-        <div class="nav-logo">
-            <a href="{{ route('home') }}">
-                @if (setting('site_logo'))
-                    <img src="{{ media_url(setting('site_logo')) }}" alt="{{ setting('site_title') }}" />
-                @else
-                    <strong style="color:var(--red);font-family:'Barlow Condensed';font-size:22px;">MULTI
-                        PLASTIK</strong>
-                @endif
-            </a>
-        </div>
-
-        <ul class="nav-links">
-            <li><a href="{{ route('home') }}">Beranda</a></li>
-            <li><a href="{{ route('site.brands') }}">Produk & Brand</a></li>
-            <li><a href="{{ route('site.news') }}">News</a></li>
-            <li><a href="{{ route('home') }}#kontak-s">Kontak</a></li>
-        </ul>
+        <a class="nav-logo" href="{{ route('home') }}" style="text-decoration:none;">
+            @if (setting('site_logo'))
+                <img src="{{ media_url(setting('site_logo')) }}" alt="{{ setting('site_title') }}" />
+            @else
+                <strong style="color:var(--red);font-family:'Barlow Condensed';font-size:22px;">MULTI PLASTIK</strong>
+            @endif
+        </a>
 
         <div class="nav-right">
-            <button class="nav-search-pill" onclick="openSearch()"><i class="fas fa-search"></i> Cari</button>
-            <a href="{{ wa_link() }}" target="_blank" class="nav-cta"
-                style="text-decoration:none;font-family:'Barlow Condensed';font-weight:700;font-size:14px;text-transform:uppercase;"><i
-                    class="fab fa-whatsapp"></i> Chat</a>
+            <ul class="nav-center">
+                <li><a href="{{ route('home') }}#about-s">Tentang</a></li>
+                <li><a href="{{ route('site.brands') }}">Produk & Brand</a></li>
+                <li><a href="{{ route('site.news') }}">News & Update</a></li>
+                <li><a href="{{ route('home') }}#keunggulan-s">Keunggulan</a></li>
+                <li><a href="{{ route('home') }}#kontak-s">Kontak</a></li>
+                <li><a href="{{ wa_link() }}" target="_blank" class="nav-cta"><i class="fab fa-whatsapp"></i>
+                        Hubungi Kami</a></li>
+            </ul>
+            <button class="nav-search-pill" onclick="openSearch()"><i class="fas fa-search"></i> <span
+                    class="nav-search-pill-text">Cari Produk</span></button>
             <div class="hamburger" onclick="document.getElementById('navDrawer').classList.toggle('open')">
                 <span></span><span></span><span></span>
             </div>
@@ -82,14 +114,15 @@
 
     <!-- Mobile drawer -->
     <div class="nav-drawer" id="navDrawer">
-        <a href="{{ route('home') }}">Beranda</a>
+        <a href="{{ route('home') }}#about-s">Tentang</a>
         <a href="{{ route('site.brands') }}">Produk & Brand</a>
-        <a href="{{ route('site.news') }}">News</a>
+        <a href="{{ route('site.news') }}">News & Update</a>
+        <a href="{{ route('home') }}#keunggulan-s">Keunggulan</a>
         <a href="{{ route('home') }}#kontak-s">Kontak</a>
         <a onclick="openSearch();document.getElementById('navDrawer').classList.remove('open')"><i
                 class="fas fa-search"></i> Cari Produk</a>
-        <a href="{{ wa_link() }}" target="_blank" class="drawer-cta"><i class="fab fa-whatsapp"></i> Chat
-            WhatsApp</a>
+        <a href="{{ wa_link() }}" target="_blank" class="drawer-cta"><i class="fab fa-whatsapp"></i> Hubungi
+            Kami</a>
     </div>
 
     @yield('content')
@@ -111,7 +144,8 @@
                         <a href="{{ setting('contact_facebook') }}" target="_blank" title="Facebook"><i
                                 class="fab fa-facebook-f"></i></a>
                     @endif
-                    <a href="{{ wa_link() }}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="{{ wa_link() }}" target="_blank" title="WhatsApp"><i
+                            class="fab fa-whatsapp"></i></a>
                     @if (setting('contact_tokopedia'))
                         <a href="{{ setting('contact_tokopedia') }}" target="_blank" title="Tokopedia"><i
                                 class="fas fa-store"></i></a>

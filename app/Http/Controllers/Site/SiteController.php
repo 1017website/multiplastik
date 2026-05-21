@@ -29,7 +29,7 @@ class SiteController extends Controller
     {
         $brands = Brand::where('is_active', true)
             ->withCount('activeCategories')
-            ->with('activeCategories')
+            ->with(['activeCategories' => fn($q) => $q->withCount('activeProducts')])
             ->orderBy('sort_order')->get();
 
         return view('site.brands', compact('brands'));
