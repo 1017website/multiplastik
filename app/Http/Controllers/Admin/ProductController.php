@@ -15,9 +15,13 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $q = Product::with('category.brand');
-        if ($request->filled('category_id')) $q->where('category_id', $request->category_id);
-        if ($request->filled('search')) $q->where('name', 'like', '%' . $request->search . '%');
-        $products = $q->orderBy('category_id')->orderBy('sort_order')->paginate(20)->withQueryString();
+        if ($request->filled('category_id'))
+            $q->where('category_id', $request->category_id);
+        if ($request->filled('search'))
+            $q->where('name', 'like', '%' . $request->search . '%');
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 20;
+        $products = $q->orderBy('category_id')->orderBy('sort_order')->paginate($perPage)->withQueryString();
         $categories = Category::with('brand')->orderBy('name')->get();
         return view('admin.products.index', compact('products', 'categories'));
     }
@@ -54,7 +58,8 @@ class ProductController extends Controller
         $data = $this->validateData($request);
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
         $newImg = $this->handleUpload($request, 'image', 'products');
-        if ($newImg) $data['image'] = $newImg;
+        if ($newImg)
+            $data['image'] = $newImg;
         $data['specs'] = $this->parseSpecs($request);
         $data['is_active'] = $request->boolean('is_active');
 
@@ -101,9 +106,11 @@ class ProductController extends Controller
         $lines = preg_split('/\r\n|\r|\n/', trim($raw));
         $specs = [];
         foreach ($lines as $l) {
-            if (!str_contains($l, '|')) continue;
+            if (!str_contains($l, '|'))
+                continue;
             [$k, $v] = array_map('trim', explode('|', $l, 2));
-            if ($k !== '' && $v !== '') $specs[] = [$k, $v];
+            if ($k !== '' && $v !== '')
+                $specs[] = [$k, $v];
         }
         return $specs;
     }
