@@ -39,3 +39,18 @@ if (!function_exists('wa_link')) {
         return $url;
     }
 }
+
+if (!function_exists('slide_link')) {
+    /**
+     * Resolve link tombol slide ke URL aktual.
+     * Format: nav:brands | nav:brand:slug | wa | url
+     */
+    function slide_link(?string $link): string
+    {
+        if (!$link) return '#';
+        if ($link === 'wa') return wa_link();
+        if ($link === 'nav:brands') return route('site.brands');
+        if (str_starts_with($link, 'nav:brand:')) return route('site.brand', substr($link, 10));
+        return $link;
+    }
+}

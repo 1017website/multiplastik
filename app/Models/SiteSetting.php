@@ -9,13 +9,17 @@ class SiteSetting extends Model
 {
     protected $fillable = ['key', 'value', 'group', 'type'];
 
+    /** In-memory cache untuk 1 request — hindari N+1 */
+    protected static ?array $memo = null;
+
     public static function get(string $key, $default = null)
     {
-        $settings = Cache::rememberForever('site_settings', function () {
-            return self::all()->pluck('value', 'key')->toArray();
-        });
-
-        return $settings[$key] ?? $default;
+        if (static::$memo === null) {
+            static::$memo = Cache::remember('site_settings', 3600, function () {
+                return self::all()->pluck('value', 'key')->toArray();
+            });
+        }
+        return static::$memo[$key] ?? $default;
     }
 
     public static function set(string $key, $value, string $group = 'general', string $type = 'text'): void
@@ -25,11 +29,18 @@ class SiteSetting extends Model
             ['value' => $value, 'group' => $group, 'type' => $type]
         );
         Cache::forget('site_settings');
+        static::$memo = null;
     }
 
     protected static function booted(): void
     {
-        static::saved(fn() => Cache::forget('site_settings'));
-        static::deleted(fn() => Cache::forget('site_settings'));
+        static::saved(function () {
+            Cache::forget('site_settings');
+            static::$memo = null;
+        });
+        static::deleted(function () {
+            Cache::forget('site_settings');
+            static::$memo = null;
+        });
     }
 }

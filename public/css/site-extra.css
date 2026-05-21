@@ -1,0 +1,177 @@
+/* ============================================================
+   MULTI-PAGE ADDITIONAL CSS
+   Class-class tambahan yang tidak ada di template SPA asli
+   ============================================================ */
+
+/* HOME — Brand cards */
+.home-brand-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--white);
+    border: 1px solid var(--g200);
+    border-radius: 8px;
+    padding: 32px 24px;
+    transition: all .3s;
+    color: var(--g800);
+}
+
+.home-brand-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .1);
+    transform: translateY(-4px);
+    border-color: var(--red);
+}
+
+.home-brand-card img {
+    max-height: 72px;
+    max-width: 160px;
+    object-fit: contain;
+    margin-bottom: 16px;
+}
+
+.home-brand-card h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    text-transform: uppercase;
+    color: var(--g800);
+    margin-bottom: 8px;
+}
+
+.home-brand-card p {
+    font-size: 13px;
+    color: var(--g600);
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
+
+.home-brand-link {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--red);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.home-brand-link i {
+    transition: transform .2s;
+}
+
+.home-brand-card:hover .home-brand-link i {
+    transform: translateX(4px);
+}
+
+/* BRAND DETAIL — hero */
+.brand-hero {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    margin-bottom: 32px;
+}
+
+.brand-hero-logo {
+    max-height: 100px;
+    max-width: 200px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .brand-hero {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+/* CATEGORY grid & cards */
+.cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.cat-card {
+    background: var(--white);
+    border: 1px solid var(--g200);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all .3s;
+    color: var(--g800);
+}
+
+.cat-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .1);
+    transform: translateY(-4px);
+    border-color: var(--red);
+}
+
+.cat-card-img {
+    width: 100%;
+    height: 180px;
+    background: var(--g50);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.cat-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s;
+}
+
+.cat-card:hover .cat-card-img img {
+    transform: scale(1.05);
+}
+
+.cat-card-img i {
+    font-size: 48px;
+    color: var(--red);
+    opacity: .4;
+}
+
+.cat-card-body {
+    padding: 20px;
+}
+
+.cat-card-body h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    text-transform: uppercase;
+    color: var(--g800);
+    margin-bottom: 8px;
+}
+
+.cat-card-body p {
+    font-size: 13px;
+    color: var(--g600);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.cat-card-meta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--red);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* PRODUCTS grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+}
