@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ArtisanController;
+use App\Http\Controllers\Admin\CsController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BrandController;
@@ -27,6 +29,9 @@ Route::get('/cari', [SiteController::class, 'search'])->name('site.search');
 Route::get('/brand/{brand}', [SiteController::class, 'brandDetail'])->name('site.brand');
 Route::get('/brand/{brand}/{category}', [SiteController::class, 'category'])->name('site.category');
 Route::get('/brand/{brand}/{category}/{product}', [SiteController::class, 'product'])->name('site.product');
+
+// Public API — CS round-robin (tanpa auth)
+Route::post('/api/cs/next', [CsController::class, 'next'])->name('cs.next');
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +74,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Settings
         Route::get('settings/{group?}', [SettingController::class, 'index'])->name('settings.index');
         Route::post('settings/{group}', [SettingController::class, 'update'])->name('settings.update');
+
+        // CS Management
+        Route::get('cs', [CsController::class, 'index'])->name('cs.index');
+        Route::post('cs', [CsController::class, 'store'])->name('cs.store');
+        Route::put('cs/{csAgent}', [CsController::class, 'update'])->name('cs.update');
+        Route::delete('cs/{csAgent}', [CsController::class, 'destroy'])->name('cs.destroy');
+
+        // Artisan Console
+        Route::get('artisan', [ArtisanController::class, 'index'])->name('artisan.index');
+        Route::post('artisan/run', [ArtisanController::class, 'run'])->name('artisan.run');
 
         // Analytics
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
