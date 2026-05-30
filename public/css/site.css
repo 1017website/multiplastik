@@ -311,11 +311,22 @@
     }
     /* Navbar collapse ke hamburger */
     @media(max-width:860px){
-      .nav-links{display:none!important;}
-      .hamburger{display:flex!important;}
-      .nav-right{gap:8px;}
-      /* Sembunyikan text Cari Produk, tampilkan icon saja */
-      .nav-search-pill{padding:7px 10px;}
+      nav{height:64px;padding:0 4%;}
+      nav.scrolled{height:60px;}
+      .nav-logo{display:flex;align-items:center;min-width:0;}
+      .nav-logo img{height:40px;max-width:120px;}
+      .nav-center,.nav-links{display:none!important;}
+      .hamburger{display:flex!important;align-items:center;justify-content:center;width:38px;height:38px;border:1.5px solid var(--g200);border-radius:4px;background:var(--white);}
+      .hamburger span{width:20px;height:2px;background:var(--g800);transition:transform .2s,opacity .2s;}
+      .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+      .hamburger.open span:nth-child(2){opacity:0;}
+      .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+      .nav-right{gap:8px;margin-left:auto;flex-shrink:0;}
+      .nav-search-pill{padding:7px 10px;min-width:38px;height:38px;justify-content:center;}
+      .nav-search-pill span,.nav-search-pill-text{display:none;}
+      .nav-drawer{top:64px;z-index:999;padding:10px 4% 14px;box-shadow:0 14px 28px rgba(0,0,0,.12);}
+      .nav-drawer a{padding:13px 10px;font-size:16px;}
+      body.nav-open{overflow:hidden;}
     }
     /* ===== TABLET (768px – 860px) ===== */
     @media(max-width:860px) and (min-width:481px){
@@ -437,12 +448,24 @@
       .hbrand-card{padding:20px 14px;}
       .hbrand-name{font-size:17px;}
       /* Nav */
+      nav{height:62px;}
+      nav.scrolled{height:58px;}
+      .nav-logo img{height:38px;max-width:112px;}
+      .nav-drawer{top:62px;max-height:calc(100vh - 62px);}
       .nav-search-pill{padding:6px 9px;font-size:12px;}
       /* Kontak */
       .ki{flex-direction:row;align-items:flex-start;}
       /* WA float — geser sedikit dari pojok */
       .wa-float{bottom:20px;right:16px;}
       .wa-list{min-width:200px;}
+    }
+
+    @media(max-width:380px){
+      nav{padding:0 3%;}
+      .nav-logo img{height:34px;max-width:98px;}
+      .nav-right{gap:6px;}
+      .nav-search-pill,.hamburger{width:36px;height:36px;min-width:36px;}
+      .hamburger span{width:18px;}
     }
     /* SEARCH */
     .nav-search-btn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:2px solid rgba(13,13,13,.12);color:var(--g600);font-size:15px;cursor:pointer;transition:all .25s;margin-right:4px;background:transparent;}

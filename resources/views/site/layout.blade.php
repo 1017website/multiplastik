@@ -44,9 +44,13 @@
   <link rel="stylesheet" href="{{ asset('css/site.css') }}"/>
   <link rel="stylesheet" href="{{ asset('css/site-extra.css') }}"/>
   <style>
-    /* Nav fix: pastikan nav-center tidak wrap */
+    /* Nav safety: desktop tetap horizontal, mobile full hamburger */
     .nav-center { flex-wrap: nowrap; }
     #mainNav .nav-right { gap: 12px; }
+    @media(max-width:860px){
+      #mainNav .nav-center{display:none!important;}
+      #mainNav .nav-right{gap:8px;}
+    }
   </style>
   <script src="https://elfsightcdn.com/platform.js" defer></script>
 
@@ -76,9 +80,9 @@
       <li><a href="#" onclick="openCS(event)" class="nav-cta"><i class="fab fa-whatsapp"></i> Hubungi Kami</a></li>
     </ul>
     <button class="nav-search-pill" onclick="openSearch()"><i class="fas fa-search"></i> <span class="nav-search-pill-text">Cari Produk</span></button>
-    <div class="hamburger" onclick="document.getElementById('navDrawer').classList.toggle('open')">
+    <button type="button" class="hamburger" id="navToggle" aria-label="Buka menu" aria-controls="navDrawer" aria-expanded="false">
       <span></span><span></span><span></span>
-    </div>
+    </button>
   </div>
 </nav>
 
@@ -180,6 +184,31 @@
     const nav = document.getElementById('mainNav');
     if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
   });
+
+  // Mobile navbar drawer
+  const navToggle = document.getElementById('navToggle');
+  const navDrawer = document.getElementById('navDrawer');
+  function closeNavDrawer(){
+    if (!navToggle || !navDrawer) return;
+    navDrawer.classList.remove('open');
+    navToggle.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+    const searchOverlay = document.getElementById('searchOverlay');
+    if (!searchOverlay || !searchOverlay.classList.contains('open')) {
+      document.body.style.overflow = '';
+    }
+  }
+  if (navToggle && navDrawer) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = navDrawer.classList.toggle('open');
+      navToggle.classList.toggle('open', isOpen);
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      document.body.classList.toggle('nav-open', isOpen);
+    });
+    navDrawer.querySelectorAll('a').forEach(link => link.addEventListener('click', closeNavDrawer));
+    window.addEventListener('resize', () => { if (window.innerWidth > 860) closeNavDrawer(); });
+  }
   // Search overlay
   function openSearch(){
     document.getElementById('searchOverlay').classList.add('open');
