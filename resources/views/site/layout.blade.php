@@ -29,7 +29,12 @@
   <meta property="og:title" content="@yield('title', setting('site_title'))"/>
   <meta property="og:description" content="@yield('meta_description', setting('site_description'))"/>
   @if(setting('og_image'))<meta property="og:image" content="{{ media_url(setting('og_image')) }}"/>@endif
-  @if(setting('site_favicon'))<link rel="icon" href="{{ media_url(setting('site_favicon')) }}"/>@endif
+  @if(setting('site_favicon'))
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ media_url(setting('site_favicon')) }}"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ media_url(setting('site_favicon')) }}"/>
+    <link rel="shortcut icon" href="{{ media_url(setting('site_favicon')) }}"/>
+    <link rel="apple-touch-icon" href="{{ media_url(setting('site_favicon')) }}"/>
+  @endif
 
     @php
         $ldData = ['@context'=>'https://schema.org','@type'=>'Organization','name'=>setting('site_title'),'url'=>url('/')];
