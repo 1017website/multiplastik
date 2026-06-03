@@ -23,7 +23,7 @@
       <div class="news-detail-content">{!! $article->content !!}</div>
 
       <div style="margin-top:36px;padding-top:24px;border-top:1px solid var(--g200);">
-        <a href="{{ wa_link('Halo, saya membaca artikel "'.$article->title.'" dan ingin bertanya lebih lanjut.') }}" target="_blank" class="btn-p">
+        <a href="#" onclick="openCS(event, @js('Halo, saya membaca artikel \"'.$article->title.'\" dan ingin bertanya lebih lanjut.'))" class="btn-p">
           <i class="fab fa-whatsapp"></i> Hubungi Kami
         </a>
       </div>

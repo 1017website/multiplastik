@@ -247,8 +247,8 @@
                 </div>
                 <div class="ki">
                     <div class="ki-icon"><i class="fab fa-whatsapp"></i></div>
-                    <div class="ki-text"><strong>WhatsApp</strong><a href="{{ wa_link() }}"
-                            target="_blank">{{ setting('contact_whatsapp_display') }}</a></div>
+                    <div class="ki-text"><strong>WhatsApp</strong><a href="#"
+                            onclick="openCS(event)">{{ setting('contact_whatsapp_display') }}</a></div>
                 </div>
                 <div class="ki">
                     <div class="ki-icon"><i class="fas fa-envelope"></i></div>

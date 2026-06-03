@@ -113,7 +113,7 @@
       <div class="footer-social">
         @if(setting('contact_instagram'))<a href="{{ setting('contact_instagram') }}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>@endif
         @if(setting('contact_facebook'))<a href="{{ setting('contact_facebook') }}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>@endif
-        <a href="{{ wa_link() }}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" onclick="openCS(event)" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
         @if(setting('contact_tokopedia'))<a href="{{ setting('contact_tokopedia') }}" target="_blank" title="Tokopedia"><i class="fas fa-store"></i></a>@endif
       </div>
     </div>
@@ -138,7 +138,7 @@
     <div class="footer-col">
       <h4>Kontak</h4>
       <ul class="footer-links">
-        <li><a href="{{ wa_link() }}" target="_blank">{{ setting('contact_whatsapp_display') }}</a></li>
+        <li><a href="#" onclick="openCS(event)">{{ setting('contact_whatsapp_display') }}</a></li>
         <li><a href="mailto:{{ setting('contact_email') }}">{{ setting('contact_email') }}</a></li>
         <li><a>{{ setting('contact_address') }}</a></li>
       </ul>
@@ -228,8 +228,13 @@
 </script>
 <script>
 // CS Round-Robin
-async function openCS(e) {
+// openCS(event)               -> pesan default (greeting agent)
+// openCS(event, "pesan ...")  -> pesan kontekstual + nomor CS round-robin
+async function openCS(e, customMessage) {
     e.preventDefault();
+    const fallbackNum = '{{ preg_replace("/[^0-9]/", "", setting("contact_whatsapp", "6281234567890")) }}';
+    const buildLink = (num, text) =>
+        'https://wa.me/' + num.replace(/[^0-9]/g, '') + (text ? '?text=' + encodeURIComponent(text) : '');
     try {
         const res = await fetch('{{ route("cs.next") }}', {
             method: 'POST',
@@ -241,10 +246,14 @@ async function openCS(e) {
         });
         if (!res.ok) throw new Error();
         const cs = await res.json();
-        window.open(cs.wa_link, '_blank');
+        // ada pesan kontekstual -> pakai nomor CS round-robin + pesan tsb
+        // tidak ada -> pakai wa_link bawaan agent (greeting)
+        const link = customMessage ? buildLink(cs.display || cs.number || '', customMessage) : cs.wa_link;
+        window.open(link, '_blank');
     } catch {
         // fallback ke nomor utama dari settings
-        window.open('{{ wa_link("Halo, saya ingin bertanya tentang produk Multi Plastik") }}', '_blank');
+        const text = customMessage || 'Halo, saya ingin bertanya tentang produk Multi Plastik';
+        window.open(buildLink(fallbackNum, text), '_blank');
     }
 }
 </script>

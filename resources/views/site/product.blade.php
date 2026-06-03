@@ -65,8 +65,9 @@
 
                 {{-- CTA --}}
                 <div class="pd-actions">
-                    <a href="{{ wa_link('Halo, saya tertarik dengan produk *' . $product->name . '* (' . $brand->name . '). Mohon info harga & ketersediaan stok.') }}"
-                        target="_blank" class="btn-wa">
+                    <a href="#"
+                        onclick="openCS(event, @js('Halo, saya tertarik dengan produk *' . $product->name . '* (' . $brand->name . '). Mohon info harga & ketersediaan stok.'))"
+                        class="btn-wa">
                         <i class="fab fa-whatsapp"></i> Tanya Harga / Order via WhatsApp
                     </a>
                     <button class="btn-share" onclick="shareProduct()">

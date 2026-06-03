@@ -96,6 +96,7 @@ class CsController extends Controller
             'id'      => $agent->id,
             'name'    => $agent->name,
             'wa_link' => $agent->wa_link,
+            'number'  => preg_replace('/[^0-9]/', '', $agent->whatsapp),
             'display' => $agent->display_number ?: $agent->whatsapp,
         ]);
     }
