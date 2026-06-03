@@ -26,6 +26,7 @@ Route::get('/brand', [SiteController::class, 'brands'])->name('site.brands');
 Route::get('/news', [SiteController::class, 'news'])->name('site.news');
 Route::get('/news/{slug}', [SiteController::class, 'newsDetail'])->name('site.news.detail');
 Route::get('/cari', [SiteController::class, 'search'])->name('site.search');
+Route::get('/cari/live', [SiteController::class, 'liveSearch'])->name('site.search.live');
 Route::get('/brand/{brand}', [SiteController::class, 'brandDetail'])->name('site.brand');
 Route::get('/brand/{brand}/{category}', [SiteController::class, 'category'])->name('site.category');
 Route::get('/brand/{brand}/{category}/{product}', [SiteController::class, 'product'])->name('site.product');

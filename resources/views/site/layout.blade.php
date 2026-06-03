@@ -164,11 +164,14 @@
   </div>
   <div class="search-box">
     <form action="{{ route('site.search') }}" method="GET">
-      <input class="search-input" id="searchInput" type="text" name="q" placeholder="Cari produk, brand, kategori..." autocomplete="off">
+      <input class="search-input" id="searchInput" type="text" name="q" placeholder="Cari produk, brand, kategori..." autocomplete="off" oninput="liveSearch(this.value)">
     </form>
     <div class="search-hint">
       <kbd>Enter</kbd> lihat semua hasil &nbsp;·&nbsp; <kbd>Esc</kbd> tutup
     </div>
+  </div>
+  <div class="search-results-wrap">
+    <div id="liveResults"></div>
   </div>
 </div>
 
@@ -187,6 +190,19 @@
   .search-input::placeholder{color:rgba(255,255,255,.3);}
   .search-hint{margin-top:12px;font-size:12px;color:rgba(255,255,255,.28);letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
   .search-hint kbd{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:3px;padding:1px 6px;font-size:11px;font-family:monospace;color:rgba(255,255,255,.5);}
+  .search-results-wrap{width:min(680px,90%);margin-top:28px;max-height:55vh;overflow-y:auto;}
+  .search-results-wrap::-webkit-scrollbar{width:4px;}
+  .search-results-wrap::-webkit-scrollbar-thumb{background:var(--red);border-radius:2px;}
+  .sr-count{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;}
+  .sr-item{display:flex;align-items:center;gap:16px;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);margin-bottom:8px;cursor:pointer;transition:background .2s;border-radius:2px;text-decoration:none;}
+  .sr-item:hover{background:rgba(255,255,255,.12);border-color:var(--red);}
+  .sr-img{width:56px;height:56px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.08);border-radius:2px;}
+  .sr-body{flex:1;min-width:0;}
+  .sr-brand{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:3px;}
+  .sr-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;color:#fff;line-height:1.1;margin-bottom:3px;}
+  .sr-desc{font-size:12px;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sr-arrow{color:rgba(255,255,255,.4);font-size:14px;flex-shrink:0;}
+  .sr-empty{text-align:center;color:rgba(255,255,255,.35);font-size:15px;padding:32px 0;}
 </style>
 
 <script>
@@ -229,8 +245,53 @@
   function closeSearch(){
     document.getElementById('searchOverlay').classList.remove('open');
     document.body.style.overflow = '';
+    const inp = document.getElementById('searchInput');
+    if (inp) inp.value = '';
+    document.getElementById('liveResults').innerHTML = '';
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
+
+  let _liveSearchTimer = null;
+  function liveSearch(q){
+    clearTimeout(_liveSearchTimer);
+    const box = document.getElementById('liveResults');
+    q = (q || '').trim();
+    if (q.length < 2){ box.innerHTML = ''; return; }
+    _liveSearchTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('{{ route("site.search.live") }}?q=' + encodeURIComponent(q));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!data.count){
+          box.innerHTML = '<div class="sr-empty">Produk tidak ditemukan untuk "' + escHtml(q) + '"</div>';
+          return;
+        }
+        let html = '<div class="sr-count">' + data.count + ' Produk Ditemukan</div>';
+        data.items.forEach(it => {
+          const meta = [it.brand, it.category].filter(Boolean).join(' · ');
+          const img = it.image
+            ? '<img class="sr-img" src="' + it.image + '" alt="" loading="lazy">'
+            : '<div class="sr-img"></div>';
+          html += '<a class="sr-item" href="' + it.url + '">' +
+                    img +
+                    '<div class="sr-body">' +
+                      (meta ? '<div class="sr-brand">' + escHtml(meta) + '</div>' : '') +
+                      '<div class="sr-name">' + escHtml(it.name) + '</div>' +
+                      (it.desc ? '<div class="sr-desc">' + escHtml(it.desc) + '</div>' : '') +
+                    '</div>' +
+                    '<i class="fas fa-arrow-right sr-arrow"></i>' +
+                  '</a>';
+        });
+        box.innerHTML = html;
+      } catch {
+        box.innerHTML = '';
+      }
+    }, 250);
+  }
+  function escHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
 </script>
 <script>
 // CS Round-Robin

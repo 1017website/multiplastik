@@ -105,4 +105,39 @@ class SiteController extends Controller
 
         return view('site.search', compact('q', 'results'));
     }
+
+    public function liveSearch(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        if (strlen($q) < 2) {
+            return response()->json(['count' => 0, 'items' => []]);
+        }
+
+        $products = Product::where('is_active', true)
+            ->where(fn($query) => $query
+                ->where('name', 'like', "%{$q}%")
+                ->orWhere('description', 'like', "%{$q}%"))
+            ->with('category.brand')
+            ->limit(8)->get();
+
+        $items = $products->map(function ($p) {
+            $brand = $p->category?->brand;
+            return [
+                'name'     => $p->name,
+                'brand'    => $brand?->name ?? '',
+                'category' => $p->category?->name ?? '',
+                'desc'     => $p->description ? \Illuminate\Support\Str::limit(strip_tags($p->description), 60) : '',
+                'image'    => $p->image_url,
+                'url'      => ($brand && $p->category)
+                    ? route('site.product', [$brand->slug, $p->category->slug, $p->slug])
+                    : '#',
+            ];
+        });
+
+        return response()->json([
+            'count' => $items->count(),
+            'items' => $items,
+        ]);
+    }
 }
