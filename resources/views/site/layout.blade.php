@@ -157,15 +157,18 @@
 
 <!-- ==================== SEARCH OVERLAY ==================== -->
 <div class="search-overlay" id="searchOverlay">
+  <div class="search-close-bar">
+    <button type="button" class="search-close-btn" onclick="closeSearch()">
+      <i class="fas fa-times"></i> Tutup (Esc)
+    </button>
+  </div>
   <div class="search-box">
     <form action="{{ route('site.search') }}" method="GET">
-      <div class="search-input-wrap">
-        <i class="fas fa-search"></i>
-        <input type="text" name="q" id="searchInput" class="search-input" placeholder="Cari produk: gelas, tusuk, sendok, styrofoam..." autocomplete="off">
-        <button type="button" class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
-      </div>
+      <input class="search-input" id="searchInput" type="text" name="q" placeholder="Cari produk, brand, kategori..." autocomplete="off">
     </form>
-    <div class="search-hint">Tekan Enter untuk mencari • ESC untuk menutup</div>
+    <div class="search-hint">
+      <kbd>Enter</kbd> lihat semua hasil &nbsp;·&nbsp; <kbd>Esc</kbd> tutup
+    </div>
   </div>
 </div>
 
@@ -173,14 +176,17 @@
   /* WA float + search overlay (komponen tambahan multi-page) */
   .wa-float{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:#25D366;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 6px 20px rgba(37,211,102,.45);z-index:900;text-decoration:none;transition:transform .2s;}
   .wa-float:hover{transform:scale(1.1);color:#fff;}
-  .search-overlay{position:fixed;inset:0;background:rgba(17,17,17,.96);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding-top:14vh;}
+  .search-overlay{position:fixed;inset:0;z-index:2000;background:rgba(17,17,17,.9);backdrop-filter:blur(10px);display:none;flex-direction:column;align-items:center;padding-top:80px;}
   .search-overlay.open{display:flex;}
-  .search-box{width:90%;max-width:680px;}
-  .search-input-wrap{display:flex;align-items:center;gap:14px;background:#fff;border-radius:8px;padding:18px 22px;}
-  .search-input-wrap > i{color:var(--red);font-size:20px;}
-  .search-input{flex:1;border:none;outline:none;font-size:18px;font-family:'Barlow',sans-serif;}
-  .search-close{background:none;border:none;color:var(--g400);font-size:20px;cursor:pointer;}
-  .search-hint{color:rgba(255,255,255,.5);font-size:13px;text-align:center;margin-top:16px;}
+  .search-close-bar{width:min(680px,90%);display:flex;justify-content:flex-end;margin-bottom:16px;}
+  .search-close-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 14px;cursor:pointer;border-radius:3px;transition:all .2s;}
+  .search-close-btn:hover{background:var(--red);border-color:var(--red);color:#fff;}
+  .search-box{width:min(680px,90%);position:relative;}
+  .search-box form{margin:0;}
+  .search-input{width:100%;box-sizing:border-box;padding:18px 24px;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:600;letter-spacing:.5px;border:none;border-bottom:3px solid var(--red);background:rgba(255,255,255,.06);color:#fff;outline:none;}
+  .search-input::placeholder{color:rgba(255,255,255,.3);}
+  .search-hint{margin-top:12px;font-size:12px;color:rgba(255,255,255,.28);letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
+  .search-hint kbd{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:3px;padding:1px 6px;font-size:11px;font-family:monospace;color:rgba(255,255,255,.5);}
 </style>
 
 <script>
