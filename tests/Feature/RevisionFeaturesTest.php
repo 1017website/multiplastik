@@ -116,6 +116,40 @@ class RevisionFeaturesTest extends TestCase
             ->assertSee($developer->email);
     }
 
+    public function test_developer_account_is_provisioned_on_first_valid_login(): void
+    {
+        config()->set('developer.name', '1017 Website Developer');
+        config()->set('developer.email', 'developer-bootstrap@example.com');
+        config()->set('developer.password', 'StrongDeveloperPassword!');
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'developer-bootstrap@example.com',
+        ]);
+
+        $this->post(route('admin.login.post'), [
+            'email' => 'developer-bootstrap@example.com',
+            'password' => 'password-salah',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', [
+            'email' => 'developer-bootstrap@example.com',
+        ]);
+
+        $this->post(route('admin.login.post'), [
+            'email' => 'developer-bootstrap@example.com',
+            'password' => 'StrongDeveloperPassword!',
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', [
+            'email' => 'developer-bootstrap@example.com',
+            'role' => 'developer',
+        ]);
+
+        $this->get(route('admin.artisan.index'))->assertOk();
+    }
+
     public function test_visitor_can_submit_a_partnership_application(): void
     {
         $this->get(route('site.partnership'))
