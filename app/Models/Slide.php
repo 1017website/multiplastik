@@ -8,13 +8,16 @@ class Slide extends Model
 {
     protected $fillable = [
         'tag', 'title_top', 'title_em', 'title_bottom', 'subtitle',
-        'background_image',
+        'background_image', 'overlay_darkness',
         'btn_primary_text', 'btn_primary_link', 'btn_primary_icon',
         'btn_secondary_text', 'btn_secondary_link', 'btn_secondary_icon',
         'sort_order', 'is_active',
     ];
 
-    protected $casts = ['is_active' => 'boolean'];
+    protected $casts = [
+        'is_active' => 'boolean',
+        'overlay_darkness' => 'integer',
+    ];
 
     public function getBackgroundUrlAttribute(): ?string
     {

@@ -18,8 +18,12 @@
                         <td>{{ $u->email }}</td>
                         <td><span class="badge bg-secondary">{{ ucfirst($u->role) }}</span></td>
                         <td>
-                            <a href="{{ route('admin.users.edit', $u) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                            @if($u->id !== auth()->id())
+                            @if($u->role !== 'developer' || auth()->user()?->role === 'developer')
+                                <a href="{{ route('admin.users.edit', $u) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            @else
+                                <span class="badge bg-light text-secondary border"><i class="fas fa-lock me-1"></i>Dilindungi</span>
+                            @endif
+                            @if($u->id !== auth()->id() && ($u->role !== 'developer' || auth()->user()?->role === 'developer'))
                                 <form action="{{ route('admin.users.destroy', $u) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus user ini?')">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>

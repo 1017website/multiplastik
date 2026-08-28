@@ -60,6 +60,7 @@ class SlideController extends Controller
             'subtitle' => 'nullable|string|max:500',
             'background_image' => 'nullable|image|max:5120',
             'background_image_url_manual' => 'nullable|string|max:500',
+            'overlay_darkness' => 'required|integer|min:0|max:100',
             'btn_primary_text' => 'nullable|string|max:100',
             'btn_primary_link' => 'nullable|string|max:255',
             'btn_primary_icon' => 'nullable|string|max:50',

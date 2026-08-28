@@ -20,9 +20,20 @@ class SiteController extends Controller
         $brands = Brand::where('is_active', true)
             ->withCount('activeCategories')
             ->orderBy('sort_order')->get();
+        $categories = Category::query()
+            ->select('categories.*')
+            ->join('brands', 'brands.id', '=', 'categories.brand_id')
+            ->where('categories.is_active', true)
+            ->where('brands.is_active', true)
+            ->with('brand')
+            ->withCount('activeProducts')
+            ->orderBy('brands.sort_order')
+            ->orderBy('categories.sort_order')
+            ->orderBy('categories.name')
+            ->get();
         $news = News::where('is_active', true)->orderByDesc('published_at')->limit(3)->get();
 
-        return view('site.home', compact('slides', 'promos', 'brands', 'news'));
+        return view('site.home', compact('slides', 'promos', 'brands', 'categories', 'news'));
     }
 
     public function brands()

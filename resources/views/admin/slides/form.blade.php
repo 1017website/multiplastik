@@ -32,6 +32,16 @@
             <div class="col-md-6">
                 @include('admin.partials.image-input', ['name' => 'background_image', 'label' => 'Background Image', 'value' => $slide->background_image, 'folder' => 'slides'])
             </div>
+            <div class="col-md-6">
+                <label class="form-label d-flex justify-content-between">
+                    <span>Kegelapan Gradasi Hero</span>
+                    <strong><output id="overlayDarknessValue">{{ old('overlay_darkness', $slide->overlay_darkness ?? 88) }}%</output></strong>
+                </label>
+                <input type="range" name="overlay_darkness" class="form-range" min="0" max="100" step="1"
+                    value="{{ old('overlay_darkness', $slide->overlay_darkness ?? 88) }}"
+                    oninput="document.getElementById('overlayDarknessValue').value = this.value + '%'">
+                <div class="form-text">0% tanpa overlay hitam, 100% paling gelap. Rekomendasi: 70–90%.</div>
+            </div>
             <div class="col-md-3">
                 <label class="form-label">Urutan</label>
                 <input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', $slide->sort_order ?? 0) }}">

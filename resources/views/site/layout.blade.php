@@ -79,6 +79,7 @@
     <ul class="nav-center">
       <li><a href="{{ route('home') }}#about-s">Tentang</a></li>
       <li><a href="{{ route('site.brands') }}">Produk & Brand</a></li>
+      <li><a href="{{ route('site.partnership') }}">Kemitraan</a></li>
       <li><a href="{{ route('site.news') }}">News & Update</a></li>
       <li><a href="{{ route('home') }}#keunggulan-s">Keunggulan</a></li>
       <li><a href="{{ route('home') }}#kontak-s">Kontak</a></li>
@@ -95,6 +96,7 @@
 <div class="nav-drawer" id="navDrawer">
   <a href="{{ route('home') }}#about-s">Tentang</a>
   <a href="{{ route('site.brands') }}">Produk & Brand</a>
+  <a href="{{ route('site.partnership') }}">Kemitraan</a>
   <a href="{{ route('site.news') }}">News & Update</a>
   <a href="{{ route('home') }}#keunggulan-s">Keunggulan</a>
   <a href="{{ route('home') }}#kontak-s">Kontak</a>
@@ -123,6 +125,7 @@
         <li><a href="{{ route('home') }}">Beranda</a></li>
         <li><a href="{{ route('home') }}#about-s">Tentang Kami</a></li>
         <li><a href="{{ route('site.brands') }}">Produk & Brand</a></li>
+        <li><a href="{{ route('site.partnership') }}">Kemitraan</a></li>
         <li><a href="{{ route('site.news') }}">News & Update</a></li>
         <li><a href="{{ route('home') }}#kontak-s">Kontak</a></li>
       </ul>
@@ -251,19 +254,30 @@
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
 
-  let _liveSearchTimer = null;
+  const _liveSearchTimers = {};
   function liveSearch(q){
-    clearTimeout(_liveSearchTimer);
-    const box = document.getElementById('liveResults');
+    runLiveSearch(q, document.getElementById('liveResults'), 'overlay');
+  }
+  function homeLiveSearch(q){
+    runLiveSearch(q, document.getElementById('homeLiveResults'), 'home');
+  }
+  function runLiveSearch(q, box, timerKey){
+    clearTimeout(_liveSearchTimers[timerKey]);
+    if (!box) return;
     q = (q || '').trim();
-    if (q.length < 2){ box.innerHTML = ''; return; }
-    _liveSearchTimer = setTimeout(async () => {
+    if (q.length < 2){
+      box.innerHTML = '';
+      box.classList.remove('open');
+      return;
+    }
+    _liveSearchTimers[timerKey] = setTimeout(async () => {
       try {
         const res = await fetch('{{ route("site.search.live") }}?q=' + encodeURIComponent(q));
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!data.count){
           box.innerHTML = '<div class="sr-empty">Produk tidak ditemukan untuk "' + escHtml(q) + '"</div>';
+          box.classList.add('open');
           return;
         }
         let html = '<div class="sr-count">' + data.count + ' Produk Ditemukan</div>';
@@ -283,8 +297,10 @@
                   '</a>';
         });
         box.innerHTML = html;
+        box.classList.add('open');
       } catch {
         box.innerHTML = '';
+        box.classList.remove('open');
       }
     }, 250);
   }

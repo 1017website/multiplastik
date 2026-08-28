@@ -477,6 +477,9 @@
             <a href="{{ route('admin.news.index') }}"
                 class="{{ request()->routeIs('admin.news.*') ? 'active' : '' }}"><i class="fas fa-newspaper"></i> News
                 & Artikel</a>
+            <a href="{{ route('admin.partnerships.index') }}"
+                class="{{ request()->routeIs('admin.partnerships.*') ? 'active' : '' }}"><i class="fas fa-handshake"></i>
+                Kemitraan</a>
 
             <div class="nav-section">Katalog</div>
             <a href="{{ route('admin.brands.index') }}"
@@ -498,9 +501,11 @@
             <a href="{{ route('admin.users.index') }}"
                 class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i class="fas fa-users-cog"></i> User
                 Admin</a>
-            <a href="{{ route('admin.artisan.index') }}"
-                class="{{ request()->routeIs('admin.artisan.*') ? 'active' : '' }}"><i class="fas fa-terminal"></i>
-                Artisan Console</a>
+            @if (auth()->user()?->role === 'developer')
+                <a href="{{ route('admin.artisan.index') }}"
+                    class="{{ request()->routeIs('admin.artisan.*') ? 'active' : '' }}"><i class="fas fa-terminal"></i>
+                    Artisan Console</a>
+            @endif
         </div>
 
         <div class="sidebar-footer">

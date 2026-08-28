@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // alias
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminOnly::class,
+            'developer' => \App\Http\Middleware\DeveloperOnly::class,
             'track-visit' => \App\Http\Middleware\TrackVisit::class,
         ]);
 

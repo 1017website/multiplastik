@@ -20,6 +20,9 @@
             <select name="role" class="form-select" required>
                 <option value="admin" @selected(old('role', $user->role)=='admin')>Admin (akses penuh)</option>
                 <option value="editor" @selected(old('role', $user->role)=='editor')>Editor</option>
+                @if (auth()->user()?->role === 'developer')
+                    <option value="developer" @selected(old('role', $user->role)=='developer')>Developer (termasuk Artisan Console)</option>
+                @endif
             </select>
         </div>
         <div class="mb-3">

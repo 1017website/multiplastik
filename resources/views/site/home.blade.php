@@ -1,5 +1,5 @@
 @extends('site.layout')
-@section('title', setting('site_title'))
+@section('title', setting('site_title', 'Multi Plastik'))
 
 @section('content')
 
@@ -14,8 +14,13 @@
                                 loading="{{ $loop->first ? 'eager' : 'lazy' }}" />
                         @endif
                     </div>
+                    @php
+                        $overlayDarkness = max(0, min(100, $slide->overlay_darkness ?? 88)) / 100;
+                        $overlayRed = round($overlayDarkness * .34, 2);
+                        $overlayTail = round($overlayDarkness * .11, 2);
+                    @endphp
                     <div class="slide-color"
-                        style="background:linear-gradient(105deg,rgba(17,17,17,.88) 40%,rgba(192,39,45,.3) 75%,rgba(17,17,17,.1) 100%);">
+                        style="background:linear-gradient(105deg,rgba(17,17,17,{{ $overlayDarkness }}) 40%,rgba(192,39,45,{{ $overlayRed }}) 75%,rgba(17,17,17,{{ $overlayTail }}) 100%);">
                     </div>
                     <div class="slide-accent"></div>
                     <div class="slide-content">
@@ -96,6 +101,50 @@
             </div>
         </div>
     @endif
+
+    <!-- ==================== CATEGORY DISCOVERY ==================== -->
+    <section id="kategori-s" class="home-category-section">
+        <div class="fu" style="text-align:center;">
+            <div class="sec-label">Temukan Berdasarkan Kategori</div>
+            <h2 class="sec-title">Cari Produk yang Anda Butuhkan</h2>
+            <div class="sec-div" style="margin:16px auto 0;"></div>
+        </div>
+
+        <div class="home-search-wrap fu">
+            <form class="home-product-search" action="{{ route('site.search') }}" method="GET" role="search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search" name="q" minlength="2" required
+                    placeholder="Cari produk, misalnya gelas 12 oz, tusuk sate, sendok..."
+                    aria-label="Cari produk" autocomplete="off"
+                    oninput="homeLiveSearch(this.value)" onfocus="homeLiveSearch(this.value)">
+                <button type="submit">Cari Produk</button>
+            </form>
+            <div id="homeLiveResults" class="home-live-results" aria-live="polite"></div>
+        </div>
+
+        <div class="home-category-grid fu">
+            @forelse ($categories as $category)
+                <a href="{{ route('site.category', [$category->brand->slug, $category->slug]) }}"
+                    class="home-category-card">
+                    <div class="home-category-image">
+                        @if ($category->image)
+                            <img src="{{ $category->image_url }}" alt="{{ $category->name }}" loading="lazy">
+                        @elseif ($category->icon)
+                            <i class="{{ $category->icon }}" aria-hidden="true"></i>
+                        @endif
+                    </div>
+                    <div class="home-category-body">
+                        <span>{{ $category->brand->name }}</span>
+                        <h3>{{ $category->name }}</h3>
+                        <p>{{ $category->active_products_count }} produk</p>
+                    </div>
+                    <i class="fas fa-arrow-right home-category-arrow" aria-hidden="true"></i>
+                </a>
+            @empty
+                <p class="home-category-empty">Belum ada kategori produk.</p>
+            @endforelse
+        </div>
+    </section>
 
     <!-- ==================== BRAND PREVIEW ==================== -->
     <section style="background:var(--g50);">

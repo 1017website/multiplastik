@@ -8,12 +8,14 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\Admin\PartnershipController as AdminPartnershipController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SlideController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Site\SiteController;
+use App\Http\Controllers\Site\PartnershipController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +29,10 @@ Route::get('/news', [SiteController::class, 'news'])->name('site.news');
 Route::get('/news/{slug}', [SiteController::class, 'newsDetail'])->name('site.news.detail');
 Route::get('/cari', [SiteController::class, 'search'])->name('site.search');
 Route::get('/cari/live', [SiteController::class, 'liveSearch'])->name('site.search.live');
+Route::get('/kemitraan', [PartnershipController::class, 'create'])->name('site.partnership');
+Route::post('/kemitraan', [PartnershipController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('site.partnership.store');
 Route::get('/brand/{brand}', [SiteController::class, 'brandDetail'])->name('site.brand');
 Route::get('/brand/{brand}/{category}', [SiteController::class, 'category'])->name('site.category');
 Route::get('/brand/{brand}/{category}/{product}', [SiteController::class, 'product'])->name('site.product');
@@ -63,6 +69,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // News
         Route::resource('news', NewsController::class)->except('show');
 
+        // Partnership leads
+        Route::get('partnerships', [AdminPartnershipController::class, 'index'])->name('partnerships.index');
+        Route::get('partnerships/{partnership}', [AdminPartnershipController::class, 'show'])->name('partnerships.show');
+        Route::put('partnerships/{partnership}', [AdminPartnershipController::class, 'update'])->name('partnerships.update');
+
         // Slides
         Route::resource('slides', SlideController::class)->except('show');
 
@@ -82,9 +93,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('cs/{csAgent}', [CsController::class, 'update'])->name('cs.update');
         Route::delete('cs/{csAgent}', [CsController::class, 'destroy'])->name('cs.destroy');
 
-        // Artisan Console
-        Route::get('artisan', [ArtisanController::class, 'index'])->name('artisan.index');
-        Route::post('artisan/run', [ArtisanController::class, 'run'])->name('artisan.run');
+        // Artisan Console — khusus role developer
+        Route::middleware('developer')->group(function () {
+            Route::get('artisan', [ArtisanController::class, 'index'])->name('artisan.index');
+            Route::post('artisan/run', [ArtisanController::class, 'run'])->name('artisan.run');
+        });
 
         // Analytics
         Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
