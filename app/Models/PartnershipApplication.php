@@ -36,6 +36,15 @@ class PartnershipApplication extends Model
         'over_6_months' => 'Lebih dari 6 bulan',
     ];
 
+    public const PREFERRED_PRODUCTS = [
+        'Gelas Plastik' => 'Gelas Plastik',
+        'Gelas Printing' => 'Gelas Printing',
+        'Tusuk Bambu' => 'Tusuk Bambu',
+        'Sendok Plastik' => 'Sendok Plastik',
+        'Styrofoam' => 'Styrofoam',
+        'Produk Lainnya' => 'Produk Lainnya',
+    ];
+
     protected $fillable = [
         'name', 'whatsapp', 'email', 'city', 'address', 'business_stage',
         'capital_range', 'start_timeline', 'preferred_products', 'message',
@@ -54,16 +63,105 @@ class PartnershipApplication extends Model
 
     public function getBusinessStageLabelAttribute(): string
     {
-        return self::BUSINESS_STAGES[$this->business_stage] ?? $this->business_stage;
+        return self::businessStages()[$this->business_stage]
+            ?? self::BUSINESS_STAGES[$this->business_stage]
+            ?? $this->business_stage;
     }
 
     public function getCapitalRangeLabelAttribute(): string
     {
-        return self::CAPITAL_RANGES[$this->capital_range] ?? $this->capital_range;
+        return self::capitalRanges()[$this->capital_range]
+            ?? self::CAPITAL_RANGES[$this->capital_range]
+            ?? $this->capital_range;
     }
 
     public function getStartTimelineLabelAttribute(): string
     {
-        return self::START_TIMELINES[$this->start_timeline] ?? $this->start_timeline;
+        return self::startTimelines()[$this->start_timeline]
+            ?? self::START_TIMELINES[$this->start_timeline]
+            ?? $this->start_timeline;
+    }
+
+    public function getPreferredProductLabelsAttribute(): array
+    {
+        $configured = self::preferredProducts();
+
+        return array_map(
+            fn (string $product) => $configured[$product]
+                ?? self::PREFERRED_PRODUCTS[$product]
+                ?? $product,
+            $this->preferred_products ?? []
+        );
+    }
+
+    public static function businessStages(): array
+    {
+        return self::configuredOptions('partnership_business_stages', self::BUSINESS_STAGES);
+    }
+
+    public static function capitalRanges(): array
+    {
+        return self::configuredOptions('partnership_capital_ranges', self::CAPITAL_RANGES);
+    }
+
+    public static function startTimelines(): array
+    {
+        return self::configuredOptions('partnership_start_timelines', self::START_TIMELINES);
+    }
+
+    public static function preferredProducts(): array
+    {
+        return self::configuredOptions('partnership_preferred_products', self::PREFERRED_PRODUCTS);
+    }
+
+    public static function fieldLabels(): array
+    {
+        return [
+            'business_stage' => SiteSetting::get('partnership_business_stage_label', 'Kondisi Usaha Saat Ini'),
+            'capital_range' => SiteSetting::get('partnership_capital_range_label', 'Kisaran Modal Awal'),
+            'start_timeline' => SiteSetting::get('partnership_start_timeline_label', 'Target Mulai Usaha'),
+            'preferred_products' => SiteSetting::get('partnership_preferred_products_label', 'Produk yang Diminati'),
+        ];
+    }
+
+    public static function optionsAsText(array $options): string
+    {
+        return collect($options)
+            ->map(fn (string $label, string $value) => $value.'|'.$label)
+            ->implode("\n");
+    }
+
+    public static function parseOptions(?string $value): array
+    {
+        if (blank($value)) {
+            return [];
+        }
+
+        $options = [];
+
+        foreach (preg_split('/\R/u', $value) ?: [] as $line) {
+            $line = trim($line);
+
+            if ($line === '') {
+                continue;
+            }
+
+            [$optionValue, $label] = str_contains($line, '|')
+                ? array_map('trim', explode('|', $line, 2))
+                : [$line, $line];
+
+            if ($optionValue !== '' && $label !== '') {
+                $options[$optionValue] = $label;
+            }
+        }
+
+        return $options;
+    }
+
+    private static function configuredOptions(string $key, array $defaults): array
+    {
+        $configured = self::parseOptions(SiteSetting::get($key));
+
+        return $configured ?: $defaults;
     }
 }

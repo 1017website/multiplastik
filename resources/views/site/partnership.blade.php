@@ -89,7 +89,7 @@
                     <textarea id="partner_address" name="address" rows="3" maxlength="1000" placeholder="Tuliskan area atau alamat rencana toko">{{ old('address') }}</textarea>
                 </div>
                 <div class="partnership-field">
-                    <label for="partner_stage">Kondisi Usaha Saat Ini <b>*</b></label>
+                    <label for="partner_stage">{{ $fieldLabels['business_stage'] }} <b>*</b></label>
                     <select id="partner_stage" name="business_stage" required>
                         <option value="">— Pilih kondisi usaha —</option>
                         @foreach ($businessStages as $value => $label)
@@ -98,7 +98,7 @@
                     </select>
                 </div>
                 <div class="partnership-field">
-                    <label for="partner_capital">Kisaran Modal Awal <b>*</b></label>
+                    <label for="partner_capital">{{ $fieldLabels['capital_range'] }} <b>*</b></label>
                     <select id="partner_capital" name="capital_range" required>
                         <option value="">— Pilih kisaran modal —</option>
                         @foreach ($capitalRanges as $value => $label)
@@ -107,7 +107,7 @@
                     </select>
                 </div>
                 <div class="partnership-field partnership-field-full">
-                    <label for="partner_timeline">Target Mulai Usaha <b>*</b></label>
+                    <label for="partner_timeline">{{ $fieldLabels['start_timeline'] }} <b>*</b></label>
                     <select id="partner_timeline" name="start_timeline" required>
                         <option value="">— Pilih target waktu —</option>
                         @foreach ($startTimelines as $value => $label)
@@ -116,10 +116,10 @@
                     </select>
                 </div>
                 <fieldset class="partnership-field partnership-field-full">
-                    <legend>Produk yang Diminati</legend>
+                    <legend>{{ $fieldLabels['preferred_products'] }}</legend>
                     <div class="partnership-checks">
-                        @foreach (['Gelas Plastik', 'Gelas Printing', 'Tusuk Bambu', 'Sendok Plastik', 'Styrofoam', 'Produk Lainnya'] as $product)
-                            <label><input type="checkbox" name="preferred_products[]" value="{{ $product }}" @checked(in_array($product, old('preferred_products', [])))><span>{{ $product }}</span></label>
+                        @foreach ($preferredProducts as $value => $label)
+                            <label><input type="checkbox" name="preferred_products[]" value="{{ $value }}" @checked(in_array($value, old('preferred_products', []), true))><span>{{ $label }}</span></label>
                         @endforeach
                     </div>
                 </fieldset>

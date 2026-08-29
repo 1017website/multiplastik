@@ -103,7 +103,8 @@
     @endif
 
     <!-- ==================== CATEGORY DISCOVERY ==================== -->
-    <section id="kategori-s" class="home-category-section">
+    @if ($showCategorySection)
+        <section id="kategori-s" class="home-category-section">
         <div class="fu" style="text-align:center;">
             <div class="sec-label">Temukan Berdasarkan Kategori</div>
             <h2 class="sec-title">Cari Produk yang Anda Butuhkan</h2>
@@ -144,10 +145,12 @@
                 <p class="home-category-empty">Belum ada kategori produk.</p>
             @endforelse
         </div>
-    </section>
+        </section>
+    @endif
 
     <!-- ==================== BRAND PREVIEW ==================== -->
-    <section style="background:var(--g50);">
+    @if ($showBrandSection)
+        <section style="background:var(--g50);">
         <div class="fu" style="text-align:center;">
             <div class="sec-label">Brand yang Kami Distribusikan</div>
             <h2 class="sec-title">Temukan Produk<br>dari Brand Terpercaya</h2>
@@ -165,7 +168,8 @@
                 </a>
             @endforeach
         </div>
-    </section>
+        </section>
+    @endif
 
     <!-- ==================== ABOUT ==================== -->
     <section id="about-s">

@@ -10,37 +10,52 @@ use App\Models\Product;
 use App\Models\Promo;
 use App\Models\Slide;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SiteController extends Controller
 {
     public function home()
     {
+        $showCategorySection = setting_enabled('home_category_section_active');
+        $showBrandSection = setting_enabled('home_brand_section_active');
         $slides = Slide::where('is_active', true)->orderBy('sort_order')->get();
         $promos = Promo::where('is_active', true)->orderBy('sort_order')->pluck('text')->toArray();
-        $brands = Brand::where('is_active', true)
-            ->withCount('activeCategories')
-            ->orderBy('sort_order')->get();
-        $categories = Category::query()
-            ->select('categories.*')
-            ->join('brands', 'brands.id', '=', 'categories.brand_id')
-            ->where('categories.is_active', true)
-            ->where('brands.is_active', true)
-            ->with('brand')
-            ->withCount('activeProducts')
-            ->orderBy('brands.sort_order')
-            ->orderBy('categories.sort_order')
-            ->orderBy('categories.name')
-            ->get();
+        $brands = $showBrandSection
+            ? Brand::where('is_active', true)
+                ->withCount('activeCategories')
+                ->orderBy('sort_order')->get()
+            : collect();
+        $categories = $showCategorySection
+            ? Category::query()
+                ->select('categories.*')
+                ->join('brands', 'brands.id', '=', 'categories.brand_id')
+                ->where('categories.is_active', true)
+                ->where('brands.is_active', true)
+                ->with('brand')
+                ->withCount('activeProducts')
+                ->orderBy('brands.sort_order')
+                ->orderBy('categories.sort_order')
+                ->orderBy('categories.name')
+                ->get()
+            : collect();
         $news = News::where('is_active', true)->orderByDesc('published_at')->limit(3)->get();
 
-        return view('site.home', compact('slides', 'promos', 'brands', 'categories', 'news'));
+        return view('site.home', compact(
+            'slides',
+            'promos',
+            'brands',
+            'categories',
+            'news',
+            'showCategorySection',
+            'showBrandSection'
+        ));
     }
 
     public function brands()
     {
         $brands = Brand::where('is_active', true)
             ->withCount('activeCategories')
-            ->with(['activeCategories' => fn($q) => $q->withCount('activeProducts')])
+            ->with(['activeCategories' => fn ($q) => $q->withCount('activeProducts')])
             ->orderBy('sort_order')->get();
 
         return view('site.brands', compact('brands'));
@@ -49,7 +64,7 @@ class SiteController extends Controller
     public function brandDetail(string $brandSlug)
     {
         $brand = Brand::where('slug', $brandSlug)->where('is_active', true)
-            ->with(['activeCategories' => fn($q) => $q->withCount('activeProducts')])
+            ->with(['activeCategories' => fn ($q) => $q->withCount('activeProducts')])
             ->firstOrFail();
 
         return view('site.brand-detail', compact('brand'));
@@ -87,6 +102,7 @@ class SiteController extends Controller
     public function news()
     {
         $news = News::where('is_active', true)->orderByDesc('published_at')->paginate(9);
+
         return view('site.news', compact('news'));
     }
 
@@ -107,7 +123,7 @@ class SiteController extends Controller
 
         if (strlen($q) >= 2) {
             $results = Product::where('is_active', true)
-                ->where(fn($query) => $query
+                ->where(fn ($query) => $query
                     ->where('name', 'like', "%{$q}%")
                     ->orWhere('description', 'like', "%{$q}%"))
                 ->with('category.brand')
@@ -126,7 +142,7 @@ class SiteController extends Controller
         }
 
         $products = Product::where('is_active', true)
-            ->where(fn($query) => $query
+            ->where(fn ($query) => $query
                 ->where('name', 'like', "%{$q}%")
                 ->orWhere('description', 'like', "%{$q}%"))
             ->with('category.brand')
@@ -134,13 +150,14 @@ class SiteController extends Controller
 
         $items = $products->map(function ($p) {
             $brand = $p->category?->brand;
+
             return [
-                'name'     => $p->name,
-                'brand'    => $brand?->name ?? '',
+                'name' => $p->name,
+                'brand' => $brand?->name ?? '',
                 'category' => $p->category?->name ?? '',
-                'desc'     => $p->description ? \Illuminate\Support\Str::limit(strip_tags($p->description), 60) : '',
-                'image'    => $p->image_url,
-                'url'      => ($brand && $p->category)
+                'desc' => $p->description ? Str::limit(strip_tags($p->description), 60) : '',
+                'image' => $p->image_url,
+                'url' => ($brand && $p->category)
                     ? route('site.product', [$brand->slug, $p->category->slug, $p->slug])
                     : '#',
             ];

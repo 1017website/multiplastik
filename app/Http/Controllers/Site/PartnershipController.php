@@ -14,28 +14,32 @@ class PartnershipController extends Controller
     public function create(): View
     {
         return view('site.partnership', [
-            'businessStages' => PartnershipApplication::BUSINESS_STAGES,
-            'capitalRanges' => PartnershipApplication::CAPITAL_RANGES,
-            'startTimelines' => PartnershipApplication::START_TIMELINES,
+            'businessStages' => PartnershipApplication::businessStages(),
+            'capitalRanges' => PartnershipApplication::capitalRanges(),
+            'startTimelines' => PartnershipApplication::startTimelines(),
+            'preferredProducts' => PartnershipApplication::preferredProducts(),
+            'fieldLabels' => PartnershipApplication::fieldLabels(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $businessStages = PartnershipApplication::businessStages();
+        $capitalRanges = PartnershipApplication::capitalRanges();
+        $startTimelines = PartnershipApplication::startTimelines();
+        $preferredProducts = PartnershipApplication::preferredProducts();
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'whatsapp' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{8,30}$/'],
             'email' => ['nullable', 'email', 'max:190'],
             'city' => ['required', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:1000'],
-            'business_stage' => ['required', Rule::in(array_keys(PartnershipApplication::BUSINESS_STAGES))],
-            'capital_range' => ['required', Rule::in(array_keys(PartnershipApplication::CAPITAL_RANGES))],
-            'start_timeline' => ['required', Rule::in(array_keys(PartnershipApplication::START_TIMELINES))],
-            'preferred_products' => ['nullable', 'array', 'max:6'],
-            'preferred_products.*' => ['string', Rule::in([
-                'Gelas Plastik', 'Gelas Printing', 'Tusuk Bambu',
-                'Sendok Plastik', 'Styrofoam', 'Produk Lainnya',
-            ])],
+            'business_stage' => ['required', Rule::in(array_keys($businessStages))],
+            'capital_range' => ['required', Rule::in(array_keys($capitalRanges))],
+            'start_timeline' => ['required', Rule::in(array_keys($startTimelines))],
+            'preferred_products' => ['nullable', 'array', 'max:50'],
+            'preferred_products.*' => ['string', Rule::in(array_keys($preferredProducts))],
             'message' => ['nullable', 'string', 'max:2000'],
             'consent' => ['accepted'],
             'website' => ['prohibited'],

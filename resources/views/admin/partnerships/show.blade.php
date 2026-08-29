@@ -31,7 +31,7 @@
                 <div class="col-md-4"><small class="text-muted d-block">Target Mulai</small><strong>{{ $partnership->start_timeline_label }}</strong></div>
                 <div class="col-12">
                     <small class="text-muted d-block mb-2">Produk yang Diminati</small>
-                    @forelse($partnership->preferred_products ?? [] as $product)
+                    @forelse($partnership->preferred_product_labels as $product)
                         <span class="badge bg-light text-dark border me-1 mb-1">{{ $product }}</span>
                     @empty
                         <span>-</span>

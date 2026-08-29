@@ -7,7 +7,10 @@
         <h4 class="mb-1">Calon Mitra</h4>
         <div class="text-muted small">Pengajuan usaha toko plastik dari website.</div>
     </div>
-    <a href="{{ route('site.partnership') }}" target="_blank" class="btn btn-outline-secondary"><i class="fas fa-external-link-alt"></i> Lihat Form</a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.settings.index', 'partnership') }}" class="btn btn-outline-primary"><i class="fas fa-sliders-h"></i> Atur Form</a>
+        <a href="{{ route('site.partnership') }}" target="_blank" class="btn btn-outline-secondary"><i class="fas fa-external-link-alt"></i> Lihat Form</a>
+    </div>
 </div>
 
 <div class="row g-3 mb-3">

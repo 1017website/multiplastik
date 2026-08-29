@@ -5,6 +5,7 @@
 @php
     $tabLabels = [
         'general' => ['Umum & SEO', 'fas fa-cog'],
+        'homepage' => ['Bagian Beranda', 'fas fa-home'],
         'contact' => ['Kontak & Sosmed', 'fas fa-phone'],
         'about' => ['Section Tentang', 'fas fa-info-circle'],
         'keunggulan' => ['Section Keunggulan', 'fas fa-trophy'],
@@ -12,6 +13,7 @@
         'sosmed_embed' => ['Embed Sosmed', 'fab fa-instagram'],
         'analytics' => ['Analytics (GA, GTM, Pixel)', 'fas fa-chart-line'],
         'ads' => ['Iklan & Custom Script', 'fas fa-bullseye'],
+        'partnership' => ['Form Kemitraan', 'fas fa-handshake'],
     ];
 @endphp
 
@@ -41,6 +43,13 @@
 
                     @if($type === 'textarea')
                         <textarea name="{{ $key }}" class="form-control" rows="3">{{ $val }}</textarea>
+                    @elseif($type === 'boolean')
+                        <input type="hidden" name="{{ $key }}" value="0">
+                        <div class="form-check form-switch border rounded p-3 ps-5 bg-light">
+                            <input class="form-check-input" type="checkbox" role="switch" id="{{ $key }}"
+                                name="{{ $key }}" value="1" @checked((string) $val !== '0')>
+                            <label class="form-check-label fw-semibold" for="{{ $key }}">Aktif</label>
+                        </div>
                     @elseif($type === 'image')
                         @if($val)
                             <div class="mb-2">
@@ -54,7 +63,7 @@
                     @endif
 
                     @if(!empty($config['help']))
-                        <small class="text-muted">{{ $config['help'] }}</small>
+                        <small class="text-muted d-block mt-1">{{ $config['help'] }}</small>
                     @endif
                 </div>
             @endforeach
@@ -83,6 +92,15 @@
             <li><strong>Google Ads Conversion ID</strong>: dari Google Ads → Tools → Conversions. Format: <code>AW-XXXXXXXXX</code></li>
             <li>Pasang UTM di link iklan agar bisa dilihat di menu <strong>Analytics</strong>: <code>?utm_source=meta&utm_medium=cpc&utm_campaign=promo-2025</code></li>
             <li><strong>Custom Script</strong>: untuk script tambahan yang belum tersedia di field di atas</li>
+        </ul>
+    </div>
+@elseif($group === 'partnership')
+    <div class="alert alert-info mt-4">
+        <h6 class="mb-2"><i class="fas fa-lightbulb"></i> Cara Mengubah Pilihan</h6>
+        <ul class="mb-0 small">
+            <li>Setiap baris akan menjadi satu pilihan pada form kemitraan.</li>
+            <li>Teks sebelum tanda <code>|</code> adalah kode data; teks setelahnya adalah tulisan yang dilihat pengunjung.</li>
+            <li>Untuk mengubah nama pilihan tanpa mengganggu data lama, ubah hanya teks setelah tanda <code>|</code>.</li>
         </ul>
     </div>
 @endif

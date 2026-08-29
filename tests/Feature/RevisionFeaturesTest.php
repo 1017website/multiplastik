@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\PartnershipApplication;
 use App\Models\Product;
+use App\Models\SiteSetting;
 use App\Models\Slide;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -64,6 +65,52 @@ class RevisionFeaturesTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('rgba(17,17,17,0.42)', false);
+    }
+
+    public function test_admin_can_toggle_home_product_and_brand_sections(): void
+    {
+        $admin = User::create([
+            'name' => 'Admin Beranda',
+            'email' => 'admin-home@example.com',
+            'password' => 'password',
+            'role' => 'admin',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.settings.index', 'homepage'))
+            ->assertOk()
+            ->assertSee('Bagian Beranda')
+            ->assertSee('Cari Produk yang Anda Butuhkan')
+            ->assertSee('Temukan Produk dari Brand Terpercaya');
+
+        $this->post(route('admin.settings.update', 'homepage'), [
+            'home_category_section_active' => '0',
+            'home_brand_section_active' => '0',
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('id="kategori-s"', false)
+            ->assertDontSee('Cari Produk yang Anda Butuhkan')
+            ->assertDontSee('Temukan Produk dari Brand Terpercaya');
+
+        $this->post(route('admin.settings.update', 'homepage'), [
+            'home_category_section_active' => '1',
+            'home_brand_section_active' => '0',
+        ])->assertRedirect();
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('id="kategori-s"', false)
+            ->assertSee('Cari Produk yang Anda Butuhkan')
+            ->assertDontSee('Temukan Produk dari Brand Terpercaya');
+
+        $this->assertDatabaseHas('site_settings', [
+            'key' => 'home_category_section_active',
+            'value' => '1',
+            'group' => 'homepage',
+            'type' => 'boolean',
+        ]);
     }
 
     public function test_artisan_console_is_only_accessible_by_developer_role(): void
@@ -219,6 +266,66 @@ class RevisionFeaturesTest extends TestCase
             'status' => 'qualified',
             'admin_notes' => 'Prospek siap dihubungi kembali hari Senin.',
         ]);
+    }
+
+    public function test_admin_can_customize_partnership_form_fields_and_options(): void
+    {
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin-form@example.com',
+            'password' => 'password',
+            'role' => 'admin',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.settings.index', 'partnership'))
+            ->assertOk()
+            ->assertSee('Form Kemitraan')
+            ->assertSee('Kondisi Usaha Saat Ini')
+            ->assertSee('Gelas Plastik');
+
+        $this->actingAs($admin)
+            ->post(route('admin.settings.update', 'partnership'), [
+                'partnership_business_stage_label' => 'Status Usaha',
+                'partnership_business_stages' => "research|Masih riset\nrunning|Sudah berjalan",
+                'partnership_capital_range_label' => 'Budget Awal',
+                'partnership_capital_ranges' => "starter|Rp5–15 juta\ngrowth|Di atas Rp15 juta",
+                'partnership_start_timeline_label' => 'Rencana Mulai',
+                'partnership_start_timelines' => "this_month|Bulan ini\nnext_quarter|Kuartal depan",
+                'partnership_preferred_products_label' => 'Produk Pilihan',
+                'partnership_preferred_products' => "standing_pouch|Standing Pouch\npaper_bowl|Paper Bowl",
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertSame('Status Usaha', SiteSetting::get('partnership_business_stage_label'));
+
+        $this->get(route('site.partnership'))
+            ->assertOk()
+            ->assertSee('Status Usaha')
+            ->assertSee('Masih riset')
+            ->assertSee('Budget Awal')
+            ->assertSee('Rp5–15 juta')
+            ->assertSee('Rencana Mulai')
+            ->assertSee('Bulan ini')
+            ->assertSee('Produk Pilihan')
+            ->assertSee('Standing Pouch');
+
+        $this->post(route('site.partnership.store'), [
+            'name' => 'Rina Wijaya',
+            'whatsapp' => '081234567891',
+            'city' => 'Malang',
+            'business_stage' => 'research',
+            'capital_range' => 'starter',
+            'start_timeline' => 'this_month',
+            'preferred_products' => ['standing_pouch'],
+            'consent' => '1',
+        ])->assertRedirect(route('site.partnership'));
+
+        $application = PartnershipApplication::where('name', 'Rina Wijaya')->firstOrFail();
+
+        $this->assertSame('Masih riset', $application->business_stage_label);
+        $this->assertSame(['Standing Pouch'], $application->preferred_product_labels);
     }
 
     public function test_partnership_honeypot_rejects_bot_submission(): void

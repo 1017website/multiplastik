@@ -3,22 +3,29 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PartnershipApplication;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class SettingController extends Controller
 {
     public function index(string $group = 'general')
     {
         $groups = $this->groupConfig();
-        if (!isset($groups[$group]))
+        if (! isset($groups[$group])) {
             abort(404);
+        }
 
         $fields = $groups[$group];
         $values = SiteSetting::whereIn('key', array_keys($fields))
             ->pluck('value', 'key')
             ->toArray();
+
+        foreach ($fields as $key => $config) {
+            $values[$key] ??= $config['default'] ?? '';
+        }
 
         return view('admin.settings.index', compact('group', 'groups', 'fields', 'values'));
     }
@@ -26,10 +33,44 @@ class SettingController extends Controller
     public function update(Request $request, string $group)
     {
         $groups = $this->groupConfig();
-        if (!isset($groups[$group]))
+        if (! isset($groups[$group])) {
             abort(404);
+        }
 
         $fields = $groups[$group];
+
+        $booleanRules = [];
+        foreach ($fields as $key => $config) {
+            if (($config['type'] ?? 'text') === 'boolean') {
+                $booleanRules[$key] = ['required', 'boolean'];
+            }
+        }
+        $request->validate($booleanRules);
+
+        if ($group === 'partnership') {
+            $request->validate([
+                'partnership_business_stage_label' => ['required', 'string', 'max:100'],
+                'partnership_business_stages' => ['required', 'string', 'max:5000'],
+                'partnership_capital_range_label' => ['required', 'string', 'max:100'],
+                'partnership_capital_ranges' => ['required', 'string', 'max:5000'],
+                'partnership_start_timeline_label' => ['required', 'string', 'max:100'],
+                'partnership_start_timelines' => ['required', 'string', 'max:5000'],
+                'partnership_preferred_products_label' => ['required', 'string', 'max:100'],
+                'partnership_preferred_products' => ['required', 'string', 'max:5000'],
+            ]);
+
+            foreach (array_keys($fields) as $key) {
+                if (($fields[$key]['type'] ?? 'text') !== 'textarea') {
+                    continue;
+                }
+
+                if (PartnershipApplication::parseOptions($request->input($key)) === []) {
+                    throw ValidationException::withMessages([
+                        $key => 'Isi minimal satu pilihan yang valid.',
+                    ]);
+                }
+            }
+        }
 
         foreach ($fields as $key => $config) {
             $type = $config['type'] ?? 'text';
@@ -38,11 +79,11 @@ class SettingController extends Controller
                 // file upload
                 if ($request->hasFile($key)) {
                     $file = $request->file($key);
-                    $name = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+                    $name = time().'_'.Str::random(8).'.'.$file->getClientOriginalExtension();
                     $file->move(public_path('uploads/site'), $name);
-                    SiteSetting::set($key, 'uploads/site/' . $name, $group, $type);
-                } elseif ($request->filled($key . '_url_manual')) {
-                    SiteSetting::set($key, $request->input($key . '_url_manual'), $group, $type);
+                    SiteSetting::set($key, 'uploads/site/'.$name, $group, $type);
+                } elseif ($request->filled($key.'_url_manual')) {
+                    SiteSetting::set($key, $request->input($key.'_url_manual'), $group, $type);
                 }
             } else {
                 if ($request->has($key)) {
@@ -85,6 +126,20 @@ class SettingController extends Controller
                 'og_image' => ['label' => 'OG Image (share)', 'type' => 'image'],
                 'footer_about' => ['label' => 'Teks Footer (deskripsi singkat)', 'type' => 'textarea'],
                 'copyright_text' => ['label' => 'Teks Copyright', 'type' => 'text'],
+            ],
+            'homepage' => [
+                'home_category_section_active' => [
+                    'label' => 'Cari Produk yang Anda Butuhkan',
+                    'type' => 'boolean',
+                    'default' => '1',
+                    'help' => 'Menampilkan kolom pencarian dan daftar kategori produk di beranda.',
+                ],
+                'home_brand_section_active' => [
+                    'label' => 'Temukan Produk dari Brand Terpercaya',
+                    'type' => 'boolean',
+                    'default' => '1',
+                    'help' => 'Menampilkan daftar brand yang aktif di beranda.',
+                ],
             ],
             'contact' => [
                 'contact_address' => ['label' => 'Alamat', 'type' => 'textarea'],
@@ -161,6 +216,52 @@ class SettingController extends Controller
                 'meta_ads_extra_script' => ['label' => 'Meta Ads — Script Tambahan (opsional)', 'type' => 'textarea'],
                 'custom_head_scripts' => ['label' => 'Custom Script di <head>', 'type' => 'textarea', 'help' => 'Akan diinject sebelum </head>'],
                 'custom_body_scripts' => ['label' => 'Custom Script sebelum </body>', 'type' => 'textarea'],
+            ],
+            'partnership' => [
+                'partnership_business_stage_label' => [
+                    'label' => 'Judul Field Kondisi Usaha',
+                    'type' => 'text',
+                    'default' => 'Kondisi Usaha Saat Ini',
+                ],
+                'partnership_business_stages' => [
+                    'label' => 'Pilihan Kondisi Usaha',
+                    'type' => 'textarea',
+                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::BUSINESS_STAGES),
+                    'help' => 'Satu pilihan per baris. Format: kode|teks. Pertahankan kode di sebelah kiri jika hanya ingin mengubah teks.',
+                ],
+                'partnership_capital_range_label' => [
+                    'label' => 'Judul Field Kisaran Modal',
+                    'type' => 'text',
+                    'default' => 'Kisaran Modal Awal',
+                ],
+                'partnership_capital_ranges' => [
+                    'label' => 'Pilihan Kisaran Modal',
+                    'type' => 'textarea',
+                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::CAPITAL_RANGES),
+                    'help' => 'Satu pilihan per baris. Format: kode|teks.',
+                ],
+                'partnership_start_timeline_label' => [
+                    'label' => 'Judul Field Target Mulai',
+                    'type' => 'text',
+                    'default' => 'Target Mulai Usaha',
+                ],
+                'partnership_start_timelines' => [
+                    'label' => 'Pilihan Target Mulai',
+                    'type' => 'textarea',
+                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::START_TIMELINES),
+                    'help' => 'Satu pilihan per baris. Format: kode|teks.',
+                ],
+                'partnership_preferred_products_label' => [
+                    'label' => 'Judul Field Produk',
+                    'type' => 'text',
+                    'default' => 'Produk yang Diminati',
+                ],
+                'partnership_preferred_products' => [
+                    'label' => 'Pilihan Produk yang Diminati',
+                    'type' => 'textarea',
+                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::PREFERRED_PRODUCTS),
+                    'help' => 'Satu pilihan per baris. Format: kode|teks. Baris dapat ditambah, dihapus, atau diurutkan ulang.',
+                ],
             ],
         ];
     }
