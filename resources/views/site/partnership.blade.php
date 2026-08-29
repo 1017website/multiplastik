@@ -18,7 +18,7 @@
                 <div class="sec-label">Peluang Usaha</div>
                 <h2 class="sec-title">Bangun Toko Plastik dengan Produk yang Tepat</h2>
                 <div class="sec-div"></div>
-                <p>Kami membantu calon mitra memahami kebutuhan awal berdasarkan lokasi, modal, dan target usahanya. Tim kami akan menghubungi Anda untuk membahas pilihan produk dan langkah selanjutnya.</p>
+                <p>Kami melayani kebutuhan pembelian pribadi maupun usaha retail. Tim kami akan menghubungi Anda untuk membahas kebutuhan produk dan langkah selanjutnya.</p>
             </div>
             <div class="partnership-benefits">
                 <div class="partnership-benefit">
@@ -26,8 +26,8 @@
                     <div><strong>Produk Beragam</strong><span>Gelas, sendok, tusuk bambu, styrofoam, dan kemasan lainnya.</span></div>
                 </div>
                 <div class="partnership-benefit">
-                    <i class="fas fa-chart-line"></i>
-                    <div><strong>Sesuai Skala Modal</strong><span>Rekomendasi awal disesuaikan dengan kesiapan dan target usaha.</span></div>
+                    <i class="fas fa-users"></i>
+                    <div><strong>End User & Retail</strong><span>Layanan disesuaikan untuk kebutuhan pribadi maupun toko retail.</span></div>
                 </div>
                 <div class="partnership-benefit">
                     <i class="fas fa-headset"></i>
@@ -39,8 +39,8 @@
         <div id="form-kemitraan" class="partnership-form-wrap">
             <div class="partnership-form-head">
                 <span>Form Calon Mitra</span>
-                <h2>Ceritakan Rencana Usaha Anda</h2>
-                <p>Isi data berikut agar tim kami dapat memberikan arahan yang lebih sesuai.</p>
+                <h2>Hubungi Tim Kemitraan Kami</h2>
+                <p>Isi data singkat berikut dan tim kami akan segera menghubungi Anda.</p>
             </div>
 
             @if (session('partnership_success'))
@@ -85,41 +85,17 @@
                     <input id="partner_city" type="text" name="city" value="{{ old('city') }}" required maxlength="120" autocomplete="address-level2">
                 </div>
                 <div class="partnership-field partnership-field-full">
-                    <label for="partner_address">Rencana Lokasi/Alamat Usaha</label>
-                    <textarea id="partner_address" name="address" rows="3" maxlength="1000" placeholder="Tuliskan area atau alamat rencana toko">{{ old('address') }}</textarea>
-                </div>
-                <div class="partnership-field">
-                    <label for="partner_stage">{{ $fieldLabels['business_stage'] }} <b>*</b></label>
-                    <select id="partner_stage" name="business_stage" required>
-                        <option value="">— Pilih kondisi usaha —</option>
-                        @foreach ($businessStages as $value => $label)
-                            <option value="{{ $value }}" @selected(old('business_stage') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="partnership-field">
-                    <label for="partner_capital">{{ $fieldLabels['capital_range'] }} <b>*</b></label>
-                    <select id="partner_capital" name="capital_range" required>
-                        <option value="">— Pilih kisaran modal —</option>
-                        @foreach ($capitalRanges as $value => $label)
-                            <option value="{{ $value }}" @selected(old('capital_range') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="partnership-field partnership-field-full">
-                    <label for="partner_timeline">{{ $fieldLabels['start_timeline'] }} <b>*</b></label>
-                    <select id="partner_timeline" name="start_timeline" required>
-                        <option value="">— Pilih target waktu —</option>
-                        @foreach ($startTimelines as $value => $label)
-                            <option value="{{ $value }}" @selected(old('start_timeline') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                    <label for="partner_address">Alamat Lengkap <b>*</b></label>
+                    <textarea id="partner_address" name="address" rows="3" maxlength="1000" required placeholder="Tuliskan alamat lengkap Anda">{{ old('address') }}</textarea>
                 </div>
                 <fieldset class="partnership-field partnership-field-full">
-                    <legend>{{ $fieldLabels['preferred_products'] }}</legend>
-                    <div class="partnership-checks">
-                        @foreach ($preferredProducts as $value => $label)
-                            <label><input type="checkbox" name="preferred_products[]" value="{{ $value }}" @checked(in_array($value, old('preferred_products', []), true))><span>{{ $label }}</span></label>
+                    <legend>{{ $fieldLabels['customer_type'] }} <b>*</b></legend>
+                    <div class="partnership-checks partnership-customer-types">
+                        @foreach ($customerTypes as $value => $label)
+                            <label>
+                                <input type="radio" name="customer_type" value="{{ $value }}" required @checked(old('customer_type') === $value)>
+                                <span>{{ $label }}</span>
+                            </label>
                         @endforeach
                     </div>
                 </fieldset>
@@ -127,15 +103,9 @@
                     <label for="partner_message">Pertanyaan atau Catatan</label>
                     <textarea id="partner_message" name="message" rows="4" maxlength="2000" placeholder="Ceritakan kebutuhan atau pertanyaan Anda">{{ old('message') }}</textarea>
                 </div>
-                <div class="partnership-consent partnership-field-full">
-                    <label>
-                        <input type="checkbox" name="consent" value="1" required @checked(old('consent'))>
-                        <span>Saya menyetujui data ini digunakan oleh Multi Plastik untuk menghubungi saya terkait kemitraan. <b>*</b></span>
-                    </label>
-                </div>
                 <div class="partnership-submit partnership-field-full">
                     <button type="submit"><i class="fas fa-paper-plane"></i> Kirim Pengajuan Kemitraan</button>
-                    <small>Tim kami akan menghubungi Anda melalui WhatsApp.</small>
+                    <small>Dengan mengirim form, Anda menyetujui tim kami menghubungi Anda melalui WhatsApp.</small>
                 </div>
             </form>
         </div>

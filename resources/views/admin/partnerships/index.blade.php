@@ -51,20 +51,19 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table mb-0 align-middle">
-            <thead><tr><th>Tanggal</th><th>Calon Mitra</th><th>Lokasi</th><th>Profil Usaha</th><th>Modal</th><th>Status</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Tanggal</th><th>Calon Mitra</th><th>Lokasi</th><th>Jenis Pelanggan</th><th>Status</th><th>Aksi</th></tr></thead>
             <tbody>
                 @forelse($applications as $application)
                     <tr>
                         <td class="text-nowrap"><strong>{{ $application->created_at->format('d M Y') }}</strong><br><small class="text-muted">{{ $application->created_at->format('H:i') }}</small></td>
                         <td><strong>{{ $application->name }}</strong><br><a href="https://wa.me/{{ preg_replace('/\D+/', '', $application->whatsapp) }}" target="_blank" class="small text-decoration-none"><i class="fab fa-whatsapp text-success"></i> {{ $application->whatsapp }}</a></td>
                         <td>{{ $application->city }}</td>
-                        <td><small>{{ $application->business_stage_label }}</small></td>
-                        <td><small>{{ $application->capital_range_label }}</small></td>
+                        <td><small>{{ $application->customer_type_label }}</small></td>
                         <td><span class="badge bg-{{ ['new'=>'danger','contacted'=>'info','qualified'=>'warning','completed'=>'success','rejected'=>'secondary'][$application->status] ?? 'secondary' }}">{{ $application->status_label }}</span></td>
                         <td><a href="{{ route('admin.partnerships.show', $application) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> Detail</a></td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center text-muted py-5">Belum ada pengajuan kemitraan.</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted py-5">Belum ada pengajuan kemitraan.</td></tr>
                 @endforelse
             </tbody>
         </table>

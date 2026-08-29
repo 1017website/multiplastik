@@ -53,14 +53,8 @@ class SettingController extends Controller
 
         if ($group === 'partnership') {
             $request->validate([
-                'partnership_business_stage_label' => ['required', 'string', 'max:100'],
-                'partnership_business_stages' => ['required', 'string', 'max:5000'],
-                'partnership_capital_range_label' => ['required', 'string', 'max:100'],
-                'partnership_capital_ranges' => ['required', 'string', 'max:5000'],
-                'partnership_start_timeline_label' => ['required', 'string', 'max:100'],
-                'partnership_start_timelines' => ['required', 'string', 'max:5000'],
-                'partnership_preferred_products_label' => ['required', 'string', 'max:100'],
-                'partnership_preferred_products' => ['required', 'string', 'max:5000'],
+                'partnership_customer_type_label' => ['required', 'string', 'max:100'],
+                'partnership_customer_types' => ['required', 'string', 'max:5000'],
             ]);
 
             foreach (array_keys($fields) as $key) {
@@ -222,48 +216,15 @@ class SettingController extends Controller
                 'custom_body_scripts' => ['label' => 'Custom Script sebelum </body>', 'type' => 'textarea'],
             ],
             'partnership' => [
-                'partnership_business_stage_label' => [
-                    'label' => 'Judul Pertanyaan Kondisi Usaha',
+                'partnership_customer_type_label' => [
+                    'label' => 'Judul Pertanyaan Jenis Pelanggan',
                     'type' => 'text',
-                    'default' => 'Kondisi Usaha Saat Ini',
+                    'default' => 'Jenis Pelanggan',
                 ],
-                'partnership_business_stages' => [
-                    'label' => 'Pilihan Kondisi Usaha',
+                'partnership_customer_types' => [
+                    'label' => 'Pilihan Jenis Pelanggan',
                     'type' => 'option_list',
-                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::BUSINESS_STAGES),
-                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
-                ],
-                'partnership_capital_range_label' => [
-                    'label' => 'Judul Pertanyaan Kisaran Modal',
-                    'type' => 'text',
-                    'default' => 'Kisaran Modal Awal',
-                ],
-                'partnership_capital_ranges' => [
-                    'label' => 'Pilihan Kisaran Modal',
-                    'type' => 'option_list',
-                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::CAPITAL_RANGES),
-                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
-                ],
-                'partnership_start_timeline_label' => [
-                    'label' => 'Judul Pertanyaan Target Mulai',
-                    'type' => 'text',
-                    'default' => 'Target Mulai Usaha',
-                ],
-                'partnership_start_timelines' => [
-                    'label' => 'Pilihan Target Mulai',
-                    'type' => 'option_list',
-                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::START_TIMELINES),
-                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
-                ],
-                'partnership_preferred_products_label' => [
-                    'label' => 'Judul Pertanyaan Produk',
-                    'type' => 'text',
-                    'default' => 'Produk yang Diminati',
-                ],
-                'partnership_preferred_products' => [
-                    'label' => 'Pilihan Produk yang Diminati',
-                    'type' => 'option_list',
-                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::PREFERRED_PRODUCTS),
+                    'default' => PartnershipApplication::optionsAsText(PartnershipApplication::CUSTOMER_TYPES),
                     'help' => 'Pilihan ini akan tampil pada form calon mitra.',
                 ],
             ],

@@ -202,20 +202,23 @@ class RevisionFeaturesTest extends TestCase
         $this->get(route('site.partnership'))
             ->assertOk()
             ->assertSee('Mulai Usaha Toko Plastik')
-            ->assertSee('Form Calon Mitra');
+            ->assertSee('Form Calon Mitra')
+            ->assertSee('Alamat Lengkap')
+            ->assertSee('Jenis Pelanggan')
+            ->assertSee('End User')
+            ->assertSee('Retail')
+            ->assertDontSee('Kisaran Modal Awal')
+            ->assertDontSee('Target Mulai Usaha')
+            ->assertDontSee('Produk yang Diminati');
 
         $response = $this->post(route('site.partnership.store'), [
             'name' => 'Budi Santoso',
             'whatsapp' => '0812 3456 7890',
             'email' => 'budi@example.com',
             'city' => 'Surabaya',
-            'address' => 'Kecamatan Sukolilo',
-            'business_stage' => 'planning',
-            'capital_range' => '25_50',
-            'start_timeline' => '1_3_months',
-            'preferred_products' => ['Gelas Plastik', 'Tusuk Bambu'],
-            'message' => 'Ingin membuka toko plastik dekat pasar.',
-            'consent' => '1',
+            'address' => 'Jl. Sukolilo No. 10, Surabaya',
+            'customer_type' => 'retail',
+            'message' => 'Mohon informasi harga untuk toko.',
         ]);
 
         $response
@@ -226,6 +229,9 @@ class RevisionFeaturesTest extends TestCase
             'name' => 'Budi Santoso',
             'whatsapp' => '6281234567890',
             'city' => 'Surabaya',
+            'business_stage' => 'retail',
+            'capital_range' => 'not_applicable',
+            'start_timeline' => 'not_applicable',
             'status' => 'new',
         ]);
     }
@@ -281,62 +287,46 @@ class RevisionFeaturesTest extends TestCase
             ->get(route('admin.settings.index', 'partnership'))
             ->assertOk()
             ->assertSee('Form Kemitraan')
-            ->assertSee('Kondisi Usaha Saat Ini')
-            ->assertSee('Gelas Plastik')
+            ->assertSee('Jenis Pelanggan')
+            ->assertSee('End User')
+            ->assertSee('Retail')
             ->assertSee('Tambah Pilihan')
-            ->assertSee('partnership_business_stages_labels[]', false)
+            ->assertSee('partnership_customer_types_labels[]', false)
+            ->assertDontSee('Pilihan Kisaran Modal')
             ->assertDontSee('kode|teks');
 
         $this->actingAs($admin)
             ->post(route('admin.settings.update', 'partnership'), [
-                'partnership_business_stage_label' => 'Status Usaha',
-                'partnership_business_stages_values' => ['research', 'running'],
-                'partnership_business_stages_labels' => ['Masih riset', 'Sudah berjalan'],
-                'partnership_capital_range_label' => 'Budget Awal',
-                'partnership_capital_ranges_values' => ['starter', 'growth'],
-                'partnership_capital_ranges_labels' => ['Rp5–15 juta', 'Di atas Rp15 juta'],
-                'partnership_start_timeline_label' => 'Rencana Mulai',
-                'partnership_start_timelines_values' => ['this_month', 'next_quarter'],
-                'partnership_start_timelines_labels' => ['Bulan ini', 'Kuartal depan'],
-                'partnership_preferred_products_label' => 'Produk Pilihan',
-                'partnership_preferred_products_values' => ['', ''],
-                'partnership_preferred_products_labels' => ['Standing Pouch', 'Paper Bowl'],
+                'partnership_customer_type_label' => 'Tipe Pembeli',
+                'partnership_customer_types_values' => ['end_user', 'retail'],
+                'partnership_customer_types_labels' => ['Pemakai Akhir', 'Toko / Retail'],
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
 
-        $this->assertSame('Status Usaha', SiteSetting::get('partnership_business_stage_label'));
+        $this->assertSame('Tipe Pembeli', SiteSetting::get('partnership_customer_type_label'));
         $this->assertSame(
-            ['standing_pouch' => 'Standing Pouch', 'paper_bowl' => 'Paper Bowl'],
-            PartnershipApplication::preferredProducts()
+            ['end_user' => 'Pemakai Akhir', 'retail' => 'Toko / Retail'],
+            PartnershipApplication::customerTypes()
         );
 
         $this->get(route('site.partnership'))
             ->assertOk()
-            ->assertSee('Status Usaha')
-            ->assertSee('Masih riset')
-            ->assertSee('Budget Awal')
-            ->assertSee('Rp5–15 juta')
-            ->assertSee('Rencana Mulai')
-            ->assertSee('Bulan ini')
-            ->assertSee('Produk Pilihan')
-            ->assertSee('Standing Pouch');
+            ->assertSee('Tipe Pembeli')
+            ->assertSee('Pemakai Akhir')
+            ->assertSee('Toko / Retail');
 
         $this->post(route('site.partnership.store'), [
             'name' => 'Rina Wijaya',
             'whatsapp' => '081234567891',
             'city' => 'Malang',
-            'business_stage' => 'research',
-            'capital_range' => 'starter',
-            'start_timeline' => 'this_month',
-            'preferred_products' => ['standing_pouch'],
-            'consent' => '1',
+            'address' => 'Jl. Ijen No. 5, Malang',
+            'customer_type' => 'end_user',
         ])->assertRedirect(route('site.partnership'));
 
         $application = PartnershipApplication::where('name', 'Rina Wijaya')->firstOrFail();
 
-        $this->assertSame('Masih riset', $application->business_stage_label);
-        $this->assertSame(['Standing Pouch'], $application->preferred_product_labels);
+        $this->assertSame('Pemakai Akhir', $application->customer_type_label);
     }
 
     public function test_partnership_honeypot_rejects_bot_submission(): void
@@ -345,10 +335,8 @@ class RevisionFeaturesTest extends TestCase
             'name' => 'Spam Bot',
             'whatsapp' => '081234567890',
             'city' => 'Surabaya',
-            'business_stage' => 'planning',
-            'capital_range' => 'under_10',
-            'start_timeline' => 'over_6_months',
-            'consent' => '1',
+            'address' => 'Alamat bot',
+            'customer_type' => 'end_user',
             'website' => 'https://spam.example',
         ])->assertSessionHasErrors('website');
 

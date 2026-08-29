@@ -19,25 +19,9 @@
                 <div class="col-md-6"><small class="text-muted d-block">WhatsApp</small><a href="https://wa.me/{{ preg_replace('/\D+/', '', $partnership->whatsapp) }}" target="_blank"><i class="fab fa-whatsapp"></i> {{ $partnership->whatsapp }}</a></div>
                 <div class="col-md-6"><small class="text-muted d-block">Email</small><span>{{ $partnership->email ?: '-' }}</span></div>
                 <div class="col-md-6"><small class="text-muted d-block">Kota/Kabupaten</small><span>{{ $partnership->city }}</span></div>
-                <div class="col-12"><small class="text-muted d-block">Rencana Lokasi/Alamat</small><span>{{ $partnership->address ?: '-' }}</span></div>
-            </div>
-        </div>
-
-        <div class="card p-4">
-            <h6 class="text-uppercase text-muted mb-3">Rencana Usaha</h6>
-            <div class="row g-4">
-                <div class="col-md-4"><small class="text-muted d-block">Kondisi Usaha</small><strong>{{ $partnership->business_stage_label }}</strong></div>
-                <div class="col-md-4"><small class="text-muted d-block">Kisaran Modal</small><strong>{{ $partnership->capital_range_label }}</strong></div>
-                <div class="col-md-4"><small class="text-muted d-block">Target Mulai</small><strong>{{ $partnership->start_timeline_label }}</strong></div>
-                <div class="col-12">
-                    <small class="text-muted d-block mb-2">Produk yang Diminati</small>
-                    @forelse($partnership->preferred_product_labels as $product)
-                        <span class="badge bg-light text-dark border me-1 mb-1">{{ $product }}</span>
-                    @empty
-                        <span>-</span>
-                    @endforelse
-                </div>
-                <div class="col-12"><small class="text-muted d-block">Pertanyaan/Catatan Calon Mitra</small><div class="bg-light border rounded p-3 mt-1" style="white-space:pre-wrap;">{{ $partnership->message ?: '-' }}</div></div>
+                <div class="col-12"><small class="text-muted d-block">Alamat Lengkap</small><span>{{ $partnership->address ?: '-' }}</span></div>
+                <div class="col-md-6"><small class="text-muted d-block">Jenis Pelanggan</small><strong>{{ $partnership->customer_type_label }}</strong></div>
+                <div class="col-12"><small class="text-muted d-block">Pertanyaan/Catatan</small><div class="bg-light border rounded p-3 mt-1" style="white-space:pre-wrap;">{{ $partnership->message ?: '-' }}</div></div>
             </div>
         </div>
     </div>

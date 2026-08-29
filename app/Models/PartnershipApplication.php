@@ -21,6 +21,11 @@ class PartnershipApplication extends Model
         'wholesale' => 'Sudah menjalankan usaha grosir/distributor',
     ];
 
+    public const CUSTOMER_TYPES = [
+        'end_user' => 'End User',
+        'retail' => 'Retail',
+    ];
+
     public const CAPITAL_RANGES = [
         'under_10' => 'Di bawah Rp10 juta',
         '10_25' => 'Rp10–25 juta',
@@ -68,6 +73,13 @@ class PartnershipApplication extends Model
             ?? $this->business_stage;
     }
 
+    public function getCustomerTypeLabelAttribute(): string
+    {
+        return self::customerTypes()[$this->business_stage]
+            ?? self::BUSINESS_STAGES[$this->business_stage]
+            ?? $this->business_stage;
+    }
+
     public function getCapitalRangeLabelAttribute(): string
     {
         return self::capitalRanges()[$this->capital_range]
@@ -99,6 +111,11 @@ class PartnershipApplication extends Model
         return self::configuredOptions('partnership_business_stages', self::BUSINESS_STAGES);
     }
 
+    public static function customerTypes(): array
+    {
+        return self::configuredOptions('partnership_customer_types', self::CUSTOMER_TYPES);
+    }
+
     public static function capitalRanges(): array
     {
         return self::configuredOptions('partnership_capital_ranges', self::CAPITAL_RANGES);
@@ -117,10 +134,7 @@ class PartnershipApplication extends Model
     public static function fieldLabels(): array
     {
         return [
-            'business_stage' => SiteSetting::get('partnership_business_stage_label', 'Kondisi Usaha Saat Ini'),
-            'capital_range' => SiteSetting::get('partnership_capital_range_label', 'Kisaran Modal Awal'),
-            'start_timeline' => SiteSetting::get('partnership_start_timeline_label', 'Target Mulai Usaha'),
-            'preferred_products' => SiteSetting::get('partnership_preferred_products_label', 'Produk yang Diminati'),
+            'customer_type' => SiteSetting::get('partnership_customer_type_label', 'Jenis Pelanggan'),
         ];
     }
 

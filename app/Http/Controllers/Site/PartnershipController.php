@@ -14,45 +14,37 @@ class PartnershipController extends Controller
     public function create(): View
     {
         return view('site.partnership', [
-            'businessStages' => PartnershipApplication::businessStages(),
-            'capitalRanges' => PartnershipApplication::capitalRanges(),
-            'startTimelines' => PartnershipApplication::startTimelines(),
-            'preferredProducts' => PartnershipApplication::preferredProducts(),
+            'customerTypes' => PartnershipApplication::customerTypes(),
             'fieldLabels' => PartnershipApplication::fieldLabels(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $businessStages = PartnershipApplication::businessStages();
-        $capitalRanges = PartnershipApplication::capitalRanges();
-        $startTimelines = PartnershipApplication::startTimelines();
-        $preferredProducts = PartnershipApplication::preferredProducts();
+        $customerTypes = PartnershipApplication::customerTypes();
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'whatsapp' => ['required', 'string', 'max:30', 'regex:/^[0-9+\-\s()]{8,30}$/'],
             'email' => ['nullable', 'email', 'max:190'],
             'city' => ['required', 'string', 'max:120'],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'business_stage' => ['required', Rule::in(array_keys($businessStages))],
-            'capital_range' => ['required', Rule::in(array_keys($capitalRanges))],
-            'start_timeline' => ['required', Rule::in(array_keys($startTimelines))],
-            'preferred_products' => ['nullable', 'array', 'max:50'],
-            'preferred_products.*' => ['string', Rule::in(array_keys($preferredProducts))],
+            'address' => ['required', 'string', 'max:1000'],
+            'customer_type' => ['required', Rule::in(array_keys($customerTypes))],
             'message' => ['nullable', 'string', 'max:2000'],
-            'consent' => ['accepted'],
             'website' => ['prohibited'],
         ], [
             'whatsapp.regex' => 'Format nomor WhatsApp belum sesuai.',
-            'consent.accepted' => 'Persetujuan pengolahan data wajib dicentang.',
             'website.prohibited' => 'Form tidak dapat diproses.',
         ]);
 
         $data['whatsapp'] = $this->normalizeWhatsapp($data['whatsapp']);
+        $data['business_stage'] = $data['customer_type'];
+        $data['capital_range'] = 'not_applicable';
+        $data['start_timeline'] = 'not_applicable';
+        $data['preferred_products'] = [];
         $data['source_url'] = $request->headers->get('referer');
         $data['consent_at'] = now();
-        unset($data['consent'], $data['website']);
+        unset($data['customer_type'], $data['website']);
 
         PartnershipApplication::create($data);
 
