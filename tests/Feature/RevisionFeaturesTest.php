@@ -282,23 +282,34 @@ class RevisionFeaturesTest extends TestCase
             ->assertOk()
             ->assertSee('Form Kemitraan')
             ->assertSee('Kondisi Usaha Saat Ini')
-            ->assertSee('Gelas Plastik');
+            ->assertSee('Gelas Plastik')
+            ->assertSee('Tambah Pilihan')
+            ->assertSee('partnership_business_stages_labels[]', false)
+            ->assertDontSee('kode|teks');
 
         $this->actingAs($admin)
             ->post(route('admin.settings.update', 'partnership'), [
                 'partnership_business_stage_label' => 'Status Usaha',
-                'partnership_business_stages' => "research|Masih riset\nrunning|Sudah berjalan",
+                'partnership_business_stages_values' => ['research', 'running'],
+                'partnership_business_stages_labels' => ['Masih riset', 'Sudah berjalan'],
                 'partnership_capital_range_label' => 'Budget Awal',
-                'partnership_capital_ranges' => "starter|Rp5–15 juta\ngrowth|Di atas Rp15 juta",
+                'partnership_capital_ranges_values' => ['starter', 'growth'],
+                'partnership_capital_ranges_labels' => ['Rp5–15 juta', 'Di atas Rp15 juta'],
                 'partnership_start_timeline_label' => 'Rencana Mulai',
-                'partnership_start_timelines' => "this_month|Bulan ini\nnext_quarter|Kuartal depan",
+                'partnership_start_timelines_values' => ['this_month', 'next_quarter'],
+                'partnership_start_timelines_labels' => ['Bulan ini', 'Kuartal depan'],
                 'partnership_preferred_products_label' => 'Produk Pilihan',
-                'partnership_preferred_products' => "standing_pouch|Standing Pouch\npaper_bowl|Paper Bowl",
+                'partnership_preferred_products_values' => ['', ''],
+                'partnership_preferred_products_labels' => ['Standing Pouch', 'Paper Bowl'],
             ])
             ->assertRedirect()
             ->assertSessionHas('success');
 
         $this->assertSame('Status Usaha', SiteSetting::get('partnership_business_stage_label'));
+        $this->assertSame(
+            ['standing_pouch' => 'Standing Pouch', 'paper_bowl' => 'Paper Bowl'],
+            PartnershipApplication::preferredProducts()
+        );
 
         $this->get(route('site.partnership'))
             ->assertOk()

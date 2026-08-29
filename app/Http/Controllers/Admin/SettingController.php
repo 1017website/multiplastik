@@ -39,6 +39,10 @@ class SettingController extends Controller
 
         $fields = $groups[$group];
 
+        if ($group === 'partnership') {
+            $this->mergePartnershipOptionLists($request, $fields);
+        }
+
         $booleanRules = [];
         foreach ($fields as $key => $config) {
             if (($config['type'] ?? 'text') === 'boolean') {
@@ -60,7 +64,7 @@ class SettingController extends Controller
             ]);
 
             foreach (array_keys($fields) as $key) {
-                if (($fields[$key]['type'] ?? 'text') !== 'textarea') {
+                if (($fields[$key]['type'] ?? 'text') !== 'option_list') {
                     continue;
                 }
 
@@ -219,50 +223,100 @@ class SettingController extends Controller
             ],
             'partnership' => [
                 'partnership_business_stage_label' => [
-                    'label' => 'Judul Field Kondisi Usaha',
+                    'label' => 'Judul Pertanyaan Kondisi Usaha',
                     'type' => 'text',
                     'default' => 'Kondisi Usaha Saat Ini',
                 ],
                 'partnership_business_stages' => [
                     'label' => 'Pilihan Kondisi Usaha',
-                    'type' => 'textarea',
+                    'type' => 'option_list',
                     'default' => PartnershipApplication::optionsAsText(PartnershipApplication::BUSINESS_STAGES),
-                    'help' => 'Satu pilihan per baris. Format: kode|teks. Pertahankan kode di sebelah kiri jika hanya ingin mengubah teks.',
+                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
                 ],
                 'partnership_capital_range_label' => [
-                    'label' => 'Judul Field Kisaran Modal',
+                    'label' => 'Judul Pertanyaan Kisaran Modal',
                     'type' => 'text',
                     'default' => 'Kisaran Modal Awal',
                 ],
                 'partnership_capital_ranges' => [
                     'label' => 'Pilihan Kisaran Modal',
-                    'type' => 'textarea',
+                    'type' => 'option_list',
                     'default' => PartnershipApplication::optionsAsText(PartnershipApplication::CAPITAL_RANGES),
-                    'help' => 'Satu pilihan per baris. Format: kode|teks.',
+                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
                 ],
                 'partnership_start_timeline_label' => [
-                    'label' => 'Judul Field Target Mulai',
+                    'label' => 'Judul Pertanyaan Target Mulai',
                     'type' => 'text',
                     'default' => 'Target Mulai Usaha',
                 ],
                 'partnership_start_timelines' => [
                     'label' => 'Pilihan Target Mulai',
-                    'type' => 'textarea',
+                    'type' => 'option_list',
                     'default' => PartnershipApplication::optionsAsText(PartnershipApplication::START_TIMELINES),
-                    'help' => 'Satu pilihan per baris. Format: kode|teks.',
+                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
                 ],
                 'partnership_preferred_products_label' => [
-                    'label' => 'Judul Field Produk',
+                    'label' => 'Judul Pertanyaan Produk',
                     'type' => 'text',
                     'default' => 'Produk yang Diminati',
                 ],
                 'partnership_preferred_products' => [
                     'label' => 'Pilihan Produk yang Diminati',
-                    'type' => 'textarea',
+                    'type' => 'option_list',
                     'default' => PartnershipApplication::optionsAsText(PartnershipApplication::PREFERRED_PRODUCTS),
-                    'help' => 'Satu pilihan per baris. Format: kode|teks. Baris dapat ditambah, dihapus, atau diurutkan ulang.',
+                    'help' => 'Pilihan ini akan tampil pada form calon mitra.',
                 ],
             ],
         ];
+    }
+
+    /**
+     * Convert the friendly option-list inputs back to the legacy text format.
+     * Existing option values are kept so saved partnership applications remain readable.
+     */
+    private function mergePartnershipOptionLists(Request $request, array $fields): void
+    {
+        foreach ($fields as $key => $config) {
+            if (($config['type'] ?? 'text') !== 'option_list' || ! $request->has($key.'_labels')) {
+                continue;
+            }
+
+            $request->validate([
+                $key.'_labels' => ['array', 'max:50'],
+                $key.'_labels.*' => ['nullable', 'string', 'max:150'],
+                $key.'_values' => ['nullable', 'array', 'max:50'],
+                $key.'_values.*' => ['nullable', 'string', 'max:150'],
+            ]);
+
+            $labels = $request->input($key.'_labels', []);
+            $values = $request->input($key.'_values', []);
+            $lines = [];
+            $usedValues = [];
+
+            foreach ((array) $labels as $index => $rawLabel) {
+                $label = trim((string) $rawLabel);
+                if ($label === '') {
+                    continue;
+                }
+
+                // Pipes and line breaks are separators in the stored legacy format.
+                $label = trim(str_replace(['|', "\r", "\n"], ['-', ' ', ' '], $label));
+                $value = trim((string) ($values[$index] ?? ''));
+                $value = trim(str_replace(['|', "\r", "\n"], ['-', '', ''], $value));
+                $value = $value !== '' ? $value : Str::slug($label, '_');
+                $value = $value !== '' ? $value : 'pilihan';
+
+                $baseValue = $value;
+                $suffix = 2;
+                while (isset($usedValues[$value])) {
+                    $value = $baseValue.'_'.$suffix++;
+                }
+
+                $usedValues[$value] = true;
+                $lines[] = $value.'|'.$label;
+            }
+
+            $request->merge([$key => implode("\n", $lines)]);
+        }
     }
 }
