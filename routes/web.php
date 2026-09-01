@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\Admin\ArtisanController;
-use App\Http\Controllers\Admin\CsController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\ArtisanController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MasterCategoryController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\PartnershipController as AdminPartnershipController;
 use App\Http\Controllers\Admin\ProductController;
@@ -14,8 +15,8 @@ use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SlideController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Site\SiteController;
 use App\Http\Controllers\Site\PartnershipController;
+use App\Http\Controllers\Site\SiteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +30,7 @@ Route::get('/news', [SiteController::class, 'news'])->name('site.news');
 Route::get('/news/{slug}', [SiteController::class, 'newsDetail'])->name('site.news.detail');
 Route::get('/cari', [SiteController::class, 'search'])->name('site.search');
 Route::get('/cari/live', [SiteController::class, 'liveSearch'])->name('site.search.live');
+Route::get('/kategori/{masterCategory:slug}', [SiteController::class, 'masterCategory'])->name('site.master-category');
 Route::get('/kemitraan', [PartnershipController::class, 'create'])->name('site.partnership');
 Route::post('/kemitraan', [PartnershipController::class, 'store'])
     ->middleware('throttle:5,1')
@@ -60,6 +62,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('brands', BrandController::class)->except('show');
 
         // Categories
+        Route::resource('master-categories', MasterCategoryController::class)
+            ->parameters(['master-categories' => 'masterCategory'])
+            ->except('show');
         Route::resource('categories', CategoryController::class)->except('show');
 
         // Products

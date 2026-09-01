@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\MasterCategory;
 use App\Models\News;
 use App\Models\Product;
 use App\Models\Promo;
@@ -25,17 +26,15 @@ class SiteController extends Controller
                 ->withCount('activeCategories')
                 ->orderBy('sort_order')->get()
             : collect();
-        $categories = $showCategorySection
-            ? Category::query()
-                ->select('categories.*')
-                ->join('brands', 'brands.id', '=', 'categories.brand_id')
-                ->where('categories.is_active', true)
-                ->where('brands.is_active', true)
-                ->with('brand')
-                ->withCount('activeProducts')
-                ->orderBy('brands.sort_order')
-                ->orderBy('categories.sort_order')
-                ->orderBy('categories.name')
+        $masterCategories = $showCategorySection
+            ? MasterCategory::query()
+                ->where('is_active', true)
+                ->whereHas('activeCategories')
+                ->with(['activeCategories' => fn ($query) => $query
+                    ->with('brand')
+                    ->withCount('activeProducts')])
+                ->orderBy('sort_order')
+                ->orderBy('name')
                 ->get()
             : collect();
         $news = News::where('is_active', true)->orderByDesc('published_at')->limit(3)->get();
@@ -44,7 +43,7 @@ class SiteController extends Controller
             'slides',
             'promos',
             'brands',
-            'categories',
+            'masterCategories',
             'news',
             'showCategorySection',
             'showBrandSection'
@@ -75,17 +74,29 @@ class SiteController extends Controller
         $brand = Brand::where('slug', $brandSlug)->where('is_active', true)->firstOrFail();
         $category = Category::where('brand_id', $brand->id)->where('slug', $catSlug)
             ->where('is_active', true)
-            ->with('activeProducts')
+            ->with(['activeProducts', 'masterCategory'])
             ->firstOrFail();
 
         return view('site.category', compact('brand', 'category'));
+    }
+
+    public function masterCategory(MasterCategory $masterCategory)
+    {
+        abort_unless($masterCategory->is_active, 404);
+
+        $masterCategory->load(['activeCategories' => fn ($query) => $query
+            ->with('brand')
+            ->withCount('activeProducts')
+            ->orderBy('name')]);
+
+        return view('site.master-category', compact('masterCategory'));
     }
 
     public function product(string $brandSlug, string $catSlug, string $prodSlug)
     {
         $brand = Brand::where('slug', $brandSlug)->where('is_active', true)->firstOrFail();
         $category = Category::where('brand_id', $brand->id)->where('slug', $catSlug)
-            ->where('is_active', true)->firstOrFail();
+            ->where('is_active', true)->with('masterCategory')->firstOrFail();
         $product = Product::where('category_id', $category->id)->where('slug', $prodSlug)
             ->where('is_active', true)
             ->with('images')

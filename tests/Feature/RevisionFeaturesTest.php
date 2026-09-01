@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\MasterCategory;
 use App\Models\PartnershipApplication;
 use App\Models\Product;
 use App\Models\SiteSetting;
@@ -16,14 +17,21 @@ class RevisionFeaturesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_home_displays_product_search_and_active_categories(): void
+    public function test_home_displays_product_search_and_master_categories(): void
     {
+        $masterCategory = MasterCategory::create([
+            'slug' => 'gelas',
+            'name' => 'Gelas',
+            'description' => 'Pilihan gelas dari berbagai brand.',
+            'is_active' => true,
+        ]);
         $brand = Brand::create([
             'slug' => 'hok-cup',
             'name' => 'Hok Cup',
             'is_active' => true,
         ]);
         $category = Category::create([
+            'master_category_id' => $masterCategory->id,
             'brand_id' => $brand->id,
             'slug' => 'gelas-natural',
             'name' => 'Gelas Natural',
@@ -36,22 +44,89 @@ class RevisionFeaturesTest extends TestCase
             'is_active' => true,
         ]);
         Category::create([
+            'master_category_id' => $masterCategory->id,
             'brand_id' => $brand->id,
             'slug' => 'gelas-printing',
             'name' => 'Gelas Printing',
             'sort_order' => 1,
             'is_active' => true,
         ]);
+        $secondBrand = Brand::create([
+            'slug' => 'hallo',
+            'name' => 'HALLO',
+            'is_active' => true,
+        ]);
+        Category::create([
+            'master_category_id' => $masterCategory->id,
+            'brand_id' => $secondBrand->id,
+            'slug' => 'gelas-oval',
+            'name' => 'Gelas Oval',
+            'sort_order' => 2,
+            'is_active' => true,
+        ]);
 
         $this->get('/')
             ->assertOk()
             ->assertSee('Cari Produk yang Anda Butuhkan')
-            ->assertSee('Gelas Natural')
-            ->assertSeeInOrder(['Gelas Natural', 'Gelas Printing'])
-            ->assertSee('1 produk')
+            ->assertSee('Gelas')
+            ->assertSee('3 kategori · 2 brand · 1 produk')
+            ->assertSee('href="'.route('site.master-category', 'gelas').'"', false)
+            ->assertDontSee('Gelas Printing')
             ->assertSee('id="homeLiveResults"', false)
             ->assertSee('homeLiveSearch(this.value)', false)
             ->assertSee('action="'.route('site.search').'"', false);
+
+        $this->get(route('site.master-category', 'gelas'))
+            ->assertOk()
+            ->assertSee('Pilih Kategori &amp; Brand', false)
+            ->assertSeeInOrder(['Gelas Natural', 'Gelas Printing', 'Gelas Oval'])
+            ->assertSee('Hok Cup')
+            ->assertSee('HALLO');
+    }
+
+    public function test_admin_can_create_master_category_and_assign_a_brand_category(): void
+    {
+        $admin = User::create([
+            'name' => 'Admin Katalog',
+            'email' => 'admin-catalog@example.com',
+            'password' => 'password',
+            'role' => 'admin',
+        ]);
+        $brand = Brand::create([
+            'slug' => 'sone',
+            'name' => 'sOne',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)->post(route('admin.master-categories.store'), [
+            'name' => 'Sedotan',
+            'slug' => 'sedotan',
+            'icon' => 'fas fa-grip-lines-vertical',
+            'sort_order' => 2,
+            'is_active' => '1',
+        ])->assertRedirect(route('admin.master-categories.index'));
+
+        $masterCategory = MasterCategory::where('slug', 'sedotan')->firstOrFail();
+
+        $this->actingAs($admin)->post(route('admin.categories.store'), [
+            'master_category_id' => $masterCategory->id,
+            'brand_id' => $brand->id,
+            'name' => 'Sedotan Steril',
+            'slug' => 'sedotan-steril',
+            'sort_order' => 0,
+            'is_active' => '1',
+        ])->assertRedirect(route('admin.categories.index'));
+
+        $this->assertDatabaseHas('categories', [
+            'master_category_id' => $masterCategory->id,
+            'brand_id' => $brand->id,
+            'slug' => 'sedotan-steril',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Sedotan')
+            ->assertSee('1 kategori · 1 brand · 0 produk');
     }
 
     public function test_home_uses_the_slide_overlay_darkness(): void

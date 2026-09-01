@@ -124,25 +124,32 @@
         </div>
 
         <div class="home-category-grid fu">
-            @forelse ($categories as $category)
-                <a href="{{ route('site.category', [$category->brand->slug, $category->slug]) }}"
+            @forelse ($masterCategories as $masterCategory)
+                @php
+                    $fallbackCategory = $masterCategory->activeCategories->first(fn ($category) => $category->image);
+                    $coverUrl = $masterCategory->image_url ?: $fallbackCategory?->image_url;
+                    $categoryCount = $masterCategory->activeCategories->count();
+                    $brandCount = $masterCategory->activeCategories->pluck('brand_id')->unique()->count();
+                    $productCount = $masterCategory->activeCategories->sum('active_products_count');
+                @endphp
+                <a href="{{ route('site.master-category', $masterCategory->slug) }}"
                     class="home-category-card">
                     <div class="home-category-image">
-                        @if ($category->image)
-                            <img src="{{ $category->image_url }}" alt="{{ $category->name }}" loading="lazy">
-                        @elseif ($category->icon)
-                            <i class="{{ $category->icon }}" aria-hidden="true"></i>
+                        @if ($coverUrl)
+                            <img src="{{ $coverUrl }}" alt="{{ $masterCategory->name }}" loading="lazy">
+                        @elseif ($masterCategory->icon)
+                            <i class="{{ $masterCategory->icon }}" aria-hidden="true"></i>
                         @endif
                     </div>
                     <div class="home-category-body">
-                        <span>{{ $category->brand->name }}</span>
-                        <h3>{{ $category->name }}</h3>
-                        <p>{{ $category->active_products_count }} produk</p>
+                        <span>Kategori Produk</span>
+                        <h3>{{ $masterCategory->name }}</h3>
+                        <p>{{ $categoryCount }} kategori · {{ $brandCount }} brand · {{ $productCount }} produk</p>
                     </div>
                     <i class="fas fa-arrow-right home-category-arrow" aria-hidden="true"></i>
                 </a>
             @empty
-                <p class="home-category-empty">Belum ada kategori produk.</p>
+                <p class="home-category-empty">Belum ada master kategori produk.</p>
             @endforelse
         </div>
         </section>

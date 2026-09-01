@@ -4,8 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\MasterCategory;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ProductCatalogSeeder extends Seeder
 {
@@ -25,7 +27,21 @@ class ProductCatalogSeeder extends Seeder
             ]);
 
             foreach ($bData['categories'] as $cIdx => $cData) {
+                $masterData = $this->masterCategoryData($cData);
+                $masterCategory = MasterCategory::firstOrCreate(
+                    ['slug' => $masterData['slug']],
+                    [
+                        'name' => $masterData['name'],
+                        'icon' => $cData['icon'],
+                        'image' => $cData['img'],
+                        'description' => 'Pilihan '.$masterData['name'].' dari berbagai brand.',
+                        'sort_order' => MasterCategory::count(),
+                        'is_active' => true,
+                    ]
+                );
+
                 $cat = Category::create([
+                    'master_category_id' => $masterCategory->id,
                     'brand_id' => $brand->id,
                     'slug' => $cData['id'],
                     'name' => $cData['name'],
@@ -50,6 +66,29 @@ class ProductCatalogSeeder extends Seeder
                 }
             }
         }
+    }
+
+    private function masterCategoryData(array $category): array
+    {
+        $value = Str::lower($category['name'].' '.$category['id']);
+        $definitions = [
+            ['slug' => 'gelas', 'name' => 'Gelas', 'needles' => ['gelas', 'cup']],
+            ['slug' => 'kresek', 'name' => 'Kresek', 'needles' => ['kresek']],
+            ['slug' => 'sedotan', 'name' => 'Sedotan', 'needles' => ['sedotan', 'straw']],
+            ['slug' => 'sendok-makan', 'name' => 'Sendok Makan', 'needles' => ['sendok']],
+            ['slug' => 'tusuk-bambu', 'name' => 'Tusuk Bambu', 'needles' => ['tusuk']],
+            ['slug' => 'styrofoam', 'name' => 'Styrofoam', 'needles' => ['styrofoam']],
+            ['slug' => 'kantong-plastik', 'name' => 'Kantong Plastik', 'needles' => ['kantong plastik', 'plastik laundry']],
+            ['slug' => 'thinwall', 'name' => 'Thinwall', 'needles' => ['thinwall']],
+        ];
+
+        foreach ($definitions as $definition) {
+            if (Str::contains($value, $definition['needles'])) {
+                return $definition;
+            }
+        }
+
+        return ['slug' => Str::slug($category['name']), 'name' => $category['name']];
     }
 
     private function catalog(): array
@@ -141,17 +180,17 @@ class ProductCatalogSeeder extends Seeder
         ];
         $out = [];
         foreach ($sizes as $s) {
-            $img = 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623686/HOK_CUP_Natural_' . $s[6] . '.jpg';
+            $img = 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623686/HOK_CUP_Natural_'.$s[6].'.jpg';
             $out[] = [
-                'id' => 'hc-natural-' . $s[0],
-                'name' => 'Gelas Natural ' . $s[1],
+                'id' => 'hc-natural-'.$s[0],
+                'name' => 'Gelas Natural '.$s[1],
                 'img' => $img,
-                'desc' => 'Hok Cup Natural ' . $s[0] . ' – gelas plastik PP bening food grade BPA Free. Tahan panas dan dingin, dapat dipakai ulang.',
+                'desc' => 'Hok Cup Natural '.$s[0].' – gelas plastik PP bening food grade BPA Free. Tahan panas dan dingin, dapat dipakai ulang.',
                 'specs' => [
                     ['Ukuran', $s[1]],
-                    ['Diameter Atas', $s[2] . ' cm'],
-                    ['Diameter Bawah', $s[3] . ' cm'],
-                    ['Tinggi', $s[4] . ' cm'],
+                    ['Diameter Atas', $s[2].' cm'],
+                    ['Diameter Bawah', $s[3].' cm'],
+                    ['Tinggi', $s[4].' cm'],
                     ['Material', 'PP Food Grade, BPA Free'],
                     ['Sertifikasi', 'Halal, ISO 9001, ISO 14001, ISO 45001'],
                     ['Isi per Pack', '50 pcs'],
@@ -159,6 +198,7 @@ class ProductCatalogSeeder extends Seeder
                 ],
             ];
         }
+
         return $out;
     }
 
@@ -170,35 +210,35 @@ class ProductCatalogSeeder extends Seeder
                 'name' => 'Tusuk Cilok / Pentol 15 cm',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623686/ATOS_TUSUK_CILOK_15cm_oj0eup.jpg',
                 'desc' => 'ATOZ Tusuk Cilok/Pentol 15cm – halus, bersih, dan isi lebih banyak. Cocok untuk cilok bakar, pentol, dan jajanan kaki lima. Bersertifikasi Halal MUI.',
-                'specs' => [['Panjang','15 cm'],['Material','Bambu Food Grade'],['Sertifikasi','Halal MUI, ISO 22000'],['Berat per Pack','500 gram'],['Isi per Karton','48 pack'],['Berat per Karton','24 kg']],
+                'specs' => [['Panjang', '15 cm'], ['Material', 'Bambu Food Grade'], ['Sertifikasi', 'Halal MUI, ISO 22000'], ['Berat per Pack', '500 gram'], ['Isi per Karton', '48 pack'], ['Berat per Karton', '24 kg']],
             ],
             [
                 'id' => 'atoz-tusuk-gigi',
                 'name' => 'Tusuk Gigi Steril Single Pack',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623682/ATOS_TUSUK_GIGI_imyzmj.jpg',
                 'desc' => 'ATOZ Tusuk Gigi Steril – dikemas satu per satu (single wrap) dalam kemasan kertas higienis.',
-                'specs' => [['Panjang','6,5 cm'],['Jenis','Steril Single Pack'],['Material','Bambu Pilihan'],['Sertifikasi','Halal MUI'],['Isi per Pack','250 pcs'],['Isi per Karton','25.000 pcs']],
+                'specs' => [['Panjang', '6,5 cm'], ['Jenis', 'Steril Single Pack'], ['Material', 'Bambu Pilihan'], ['Sertifikasi', 'Halal MUI'], ['Isi per Pack', '250 pcs'], ['Isi per Karton', '25.000 pcs']],
             ],
             [
                 'id' => 'atoz-tusuk-sate-20',
                 'name' => 'Tusuk Sate 20 cm',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623685/ATOS_TUSUK_SATE_20_cm_pgmahm.jpg',
                 'desc' => 'ATOZ Tusuk Sate 20cm – halus, tidak mudah patah, cocok untuk sate ayam, sate kambing.',
-                'specs' => [['Panjang','20 cm'],['Material','Bambu Food Grade'],['Sertifikasi','Halal MUI, ISO 22000'],['Berat per Pack','500 gram'],['Isi per Karton','50 pack'],['Berat per Karton','25 kg']],
+                'specs' => [['Panjang', '20 cm'], ['Material', 'Bambu Food Grade'], ['Sertifikasi', 'Halal MUI, ISO 22000'], ['Berat per Pack', '500 gram'], ['Isi per Karton', '50 pack'], ['Berat per Karton', '25 kg']],
             ],
             [
                 'id' => 'atoz-tusuk-sempol-25',
                 'name' => 'Tusuk Sempol 25 cm',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623683/ATOS_TUSUK_SEMPOL_25cm_sfscec.jpg',
                 'desc' => 'ATOZ Tusuk Sempol 25cm – ukuran ideal untuk sempol, ayam goreng tusuk, jajanan goreng khas.',
-                'specs' => [['Panjang','25 cm'],['Material','Bambu Food Grade'],['Sertifikasi','Halal MUI, ISO 22000'],['Berat per Pack','500 gram'],['Isi per Karton','50 pack'],['Berat per Karton','25 kg']],
+                'specs' => [['Panjang', '25 cm'], ['Material', 'Bambu Food Grade'], ['Sertifikasi', 'Halal MUI, ISO 22000'], ['Berat per Pack', '500 gram'], ['Isi per Karton', '50 pack'], ['Berat per Karton', '25 kg']],
             ],
             [
                 'id' => 'atoz-tusuk-sempol-30',
                 'name' => 'Tusuk Sempol 30 cm',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623688/ATOS_TUSUK_SEMPOL_30cm_dwv4sc.jpg',
                 'desc' => 'ATOZ Tusuk Sempol 30cm – ukuran panjang untuk sempol besar, corn dog, jajanan festival.',
-                'specs' => [['Panjang','30 cm'],['Material','Bambu Food Grade'],['Sertifikasi','Halal MUI, ISO 22000'],['Berat per Pack','500 gram'],['Isi per Karton','50 pack'],['Berat per Karton','25 kg']],
+                'specs' => [['Panjang', '30 cm'], ['Material', 'Bambu Food Grade'], ['Sertifikasi', 'Halal MUI, ISO 22000'], ['Berat per Pack', '500 gram'], ['Isi per Karton', '50 pack'], ['Berat per Karton', '25 kg']],
             ],
         ];
     }
@@ -210,19 +250,19 @@ class ProductCatalogSeeder extends Seeder
                 'id' => 'sone-sendok-bening', 'name' => 'Sendok Makan – Bening (Transparan)',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623687/sendok_sone_ig_bening_w5oy6x.jpg',
                 'desc' => 'sOne Sendok Makan warna Bening – food grade, hygienic, tidak mudah patah. Cocok untuk katering, acara, restoran.',
-                'specs' => [['Panjang','16 cm'],['Lebar','3,5 cm'],['Warna','Bening / Transparan'],['Material','PP Food Grade'],['Jenis','Disposable Cutlery'],['Isi per Pack','100 pcs'],['Isi per Karton','2000 pcs']],
+                'specs' => [['Panjang', '16 cm'], ['Lebar', '3,5 cm'], ['Warna', 'Bening / Transparan'], ['Material', 'PP Food Grade'], ['Jenis', 'Disposable Cutlery'], ['Isi per Pack', '100 pcs'], ['Isi per Karton', '2000 pcs']],
             ],
             [
                 'id' => 'sone-sendok-hitam', 'name' => 'Sendok Makan – Hitam',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623689/sendok_sone_ig_hitam_elyozb.jpg',
                 'desc' => 'sOne Sendok Makan warna Hitam – tampilan elegan, untuk katering premium, box makanan, event formal.',
-                'specs' => [['Panjang','16 cm'],['Lebar','3,5 cm'],['Warna','Hitam'],['Material','PP Food Grade'],['Jenis','Disposable Cutlery'],['Isi per Pack','100 pcs'],['Isi per Karton','2000 pcs']],
+                'specs' => [['Panjang', '16 cm'], ['Lebar', '3,5 cm'], ['Warna', 'Hitam'], ['Material', 'PP Food Grade'], ['Jenis', 'Disposable Cutlery'], ['Isi per Pack', '100 pcs'], ['Isi per Karton', '2000 pcs']],
             ],
             [
                 'id' => 'sone-sendok-putih', 'name' => 'Sendok Makan – Putih',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623689/sendok_sone_ig_putih_lobl5b.jpg',
                 'desc' => 'sOne Sendok Makan warna Putih – pilihan universal, terlihat bersih dan higienis. Cocok untuk nasi box, warung makan.',
-                'specs' => [['Panjang','16 cm'],['Lebar','3,5 cm'],['Warna','Putih'],['Material','PP Food Grade'],['Jenis','Disposable Cutlery'],['Isi per Pack','100 pcs'],['Isi per Karton','2000 pcs']],
+                'specs' => [['Panjang', '16 cm'], ['Lebar', '3,5 cm'], ['Warna', 'Putih'], ['Material', 'PP Food Grade'], ['Jenis', 'Disposable Cutlery'], ['Isi per Pack', '100 pcs'], ['Isi per Karton', '2000 pcs']],
             ],
         ];
     }
@@ -234,19 +274,19 @@ class ProductCatalogSeeder extends Seeder
                 'id' => 'lux-h01', 'name' => 'Styrofoam Tipe H01',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623689/Styerofoam_H01_ekicmr.jpg',
                 'desc' => 'LUX Styrofoam H01 – kotak ukuran mini untuk burger, nugget, cilok bakar, jajanan kecil.',
-                'specs' => [['Tipe','H01'],['Ukuran','8,5 × 9 × 7 cm'],['Material','EPS Styrofoam, CFC Free'],['Sertifikasi','Halal'],['Isi per Pack','200 pcs'],['Isi per Ball','2400 pcs']],
+                'specs' => [['Tipe', 'H01'], ['Ukuran', '8,5 × 9 × 7 cm'], ['Material', 'EPS Styrofoam, CFC Free'], ['Sertifikasi', 'Halal'], ['Isi per Pack', '200 pcs'], ['Isi per Ball', '2400 pcs']],
             ],
             [
                 'id' => 'lux-l01', 'name' => 'Styrofoam Tipe L01',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623691/Styerofoam_L01_lshejg.jpg',
                 'desc' => 'LUX Styrofoam L01 – ukuran medium untuk nasi, lauk, salad, makanan porsi standar.',
-                'specs' => [['Tipe','L01'],['Ukuran','15,5 × 10,5 × 6,5 cm'],['Material','EPS Styrofoam, CFC Free'],['Sertifikasi','Halal'],['Isi per Pack','100 pcs'],['Isi per Ball','1000 pcs']],
+                'specs' => [['Tipe', 'L01'], ['Ukuran', '15,5 × 10,5 × 6,5 cm'], ['Material', 'EPS Styrofoam, CFC Free'], ['Sertifikasi', 'Halal'], ['Isi per Pack', '100 pcs'], ['Isi per Ball', '1000 pcs']],
             ],
             [
                 'id' => 'lux-l03-sekat', 'name' => 'Styrofoam Tipe L03 Sekat',
                 'img' => 'https://res.cloudinary.com/dcpleyqfl/image/upload/q_auto/f_auto/v1778623693/Styerofoam_L03_Sekat_as5k2u.jpg',
                 'desc' => 'LUX Styrofoam L03 Sekat – 3 kompartemen ideal untuk nasi kotak lengkap lauk, sayur, sambal.',
-                'specs' => [['Tipe','L03 Sekat'],['Ukuran','17 × 17 × 4,5 cm'],['Sekat','3 Kompartemen'],['Material','EPS Styrofoam, CFC Free'],['Sertifikasi','Halal'],['Isi per Pack','100 pcs'],['Isi per Ball','1000 pcs']],
+                'specs' => [['Tipe', 'L03 Sekat'], ['Ukuran', '17 × 17 × 4,5 cm'], ['Sekat', '3 Kompartemen'], ['Material', 'EPS Styrofoam, CFC Free'], ['Sertifikasi', 'Halal'], ['Isi per Pack', '100 pcs'], ['Isi per Ball', '1000 pcs']],
             ],
         ];
     }

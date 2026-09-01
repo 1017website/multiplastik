@@ -14,7 +14,7 @@
                 <select name="category_id" class="form-select" onchange="this.form.submit()">
                     <option value="">— Semua Kategori —</option>
                     @foreach ($categories as $c)
-                        <option value="{{ $c->id }}" @selected(request('category_id') == $c->id)>{{ $c->brand->name }} –
+                        <option value="{{ $c->id }}" @selected(request('category_id') == $c->id)>{{ $c->masterCategory?->name ?? 'Tanpa Master' }} / {{ $c->brand->name }} –
                             {{ $c->name }}</option>
                     @endforeach
                 </select>

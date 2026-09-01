@@ -9,6 +9,18 @@
     <div class="card p-4">
         <div class="row g-3">
             <div class="col-md-6">
+                <label class="form-label">Master Kategori *</label>
+                <select name="master_category_id" class="form-select" required>
+                    <option value="">— Pilih Master Kategori —</option>
+                    @foreach($masterCategories as $masterCategory)
+                        <option value="{{ $masterCategory->id }}" @selected(old('master_category_id', $category->master_category_id)==$masterCategory->id)>{{ $masterCategory->name }}</option>
+                    @endforeach
+                </select>
+                @if ($masterCategories->isEmpty())
+                    <small class="text-danger">Buat Master Kategori terlebih dahulu.</small>
+                @endif
+            </div>
+            <div class="col-md-6">
                 <label class="form-label">Brand *</label>
                 <select name="brand_id" class="form-select" required>
                     <option value="">— Pilih Brand —</option>

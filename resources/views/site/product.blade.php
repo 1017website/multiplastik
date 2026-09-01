@@ -8,6 +8,10 @@
         <span class="bcsep"><i class="fas fa-chevron-right"></i></span>
         <a href="{{ route('site.brand', $brand->slug) }}">{{ $brand->name }}</a>
         <span class="bcsep"><i class="fas fa-chevron-right"></i></span>
+        @if ($category->masterCategory?->is_active)
+            <a href="{{ route('site.master-category', $category->masterCategory->slug) }}">{{ $category->masterCategory->name }}</a>
+            <span class="bcsep"><i class="fas fa-chevron-right"></i></span>
+        @endif
         <a href="{{ route('site.category', [$brand->slug, $category->slug]) }}">{{ $category->name }}</a>
         <span class="bcsep"><i class="fas fa-chevron-right"></i></span>
         <span>{{ $product->name }}</span>

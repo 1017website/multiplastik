@@ -13,7 +13,7 @@
                 <select name="category_id" class="form-select" required>
                     <option value="">— Pilih Kategori —</option>
                     @foreach($categories as $c)
-                        <option value="{{ $c->id }}" @selected(old('category_id', $product->category_id)==$c->id)>{{ $c->brand->name }} – {{ $c->name }}</option>
+                        <option value="{{ $c->id }}" @selected(old('category_id', $product->category_id)==$c->id)>{{ $c->masterCategory?->name ?? 'Tanpa Master' }} / {{ $c->brand->name }} – {{ $c->name }}</option>
                     @endforeach
                 </select>
             </div>

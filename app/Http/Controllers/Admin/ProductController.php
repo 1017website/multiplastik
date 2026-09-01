@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -14,22 +13,26 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $q = Product::with('category.brand');
-        if ($request->filled('category_id'))
+        $q = Product::with(['category.brand', 'category.masterCategory']);
+        if ($request->filled('category_id')) {
             $q->where('category_id', $request->category_id);
-        if ($request->filled('search'))
-            $q->where('name', 'like', '%' . $request->search . '%');
+        }
+        if ($request->filled('search')) {
+            $q->where('name', 'like', '%'.$request->search.'%');
+        }
         $perPage = (int) $request->input('per_page', 20);
         $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 20;
         $products = $q->orderBy('category_id')->orderBy('sort_order')->paginate($perPage)->withQueryString();
-        $categories = Category::with('brand')->orderBy('name')->get();
+        $categories = Category::with(['brand', 'masterCategory'])->orderBy('name')->get();
+
         return view('admin.products.index', compact('products', 'categories'));
     }
 
     public function create()
     {
-        $categories = Category::with('brand')->orderBy('name')->get();
-        return view('admin.products.form', ['product' => new Product(), 'categories' => $categories]);
+        $categories = Category::with(['brand', 'masterCategory'])->orderBy('name')->get();
+
+        return view('admin.products.form', ['product' => new Product, 'categories' => $categories]);
     }
 
     public function store(Request $request)
@@ -49,7 +52,8 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $product->load('images');
-        $categories = Category::with('brand')->orderBy('name')->get();
+        $categories = Category::with(['brand', 'masterCategory'])->orderBy('name')->get();
+
         return view('admin.products.form', compact('product', 'categories'));
     }
 
@@ -58,8 +62,9 @@ class ProductController extends Controller
         $data = $this->validateData($request);
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
         $newImg = $this->handleUpload($request, 'image', 'products');
-        if ($newImg)
+        if ($newImg) {
             $data['image'] = $newImg;
+        }
         $data['specs'] = $this->parseSpecs($request);
         $data['is_active'] = $request->boolean('is_active');
 
@@ -72,12 +77,14 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+
         return back()->with('success', 'Produk dihapus.');
     }
 
     public function deleteImage(ProductImage $image)
     {
         $image->delete();
+
         return back()->with('success', 'Gambar dihapus.');
     }
 
@@ -106,26 +113,31 @@ class ProductController extends Controller
         $lines = preg_split('/\r\n|\r|\n/', trim($raw));
         $specs = [];
         foreach ($lines as $l) {
-            if (!str_contains($l, '|'))
+            if (! str_contains($l, '|')) {
                 continue;
+            }
             [$k, $v] = array_map('trim', explode('|', $l, 2));
-            if ($k !== '' && $v !== '')
+            if ($k !== '' && $v !== '') {
                 $specs[] = [$k, $v];
+            }
         }
+
         return $specs;
     }
 
     private function handleUpload(Request $request, string $field, string $folder): ?string
     {
-        if ($request->filled($field . '_url_manual')) {
-            return $request->input($field . '_url_manual');
+        if ($request->filled($field.'_url_manual')) {
+            return $request->input($field.'_url_manual');
         }
         if ($request->hasFile($field)) {
             $file = $request->file($field);
-            $name = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/' . $folder), $name);
+            $name = time().'_'.Str::random(8).'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/'.$folder), $name);
+
             return $name;
         }
+
         return null;
     }
 
@@ -134,7 +146,7 @@ class ProductController extends Controller
         // file upload gallery
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $file) {
-                $name = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+                $name = time().'_'.Str::random(8).'.'.$file->getClientOriginalExtension();
                 $file->move(public_path('uploads/products'), $name);
                 $product->images()->create(['path' => $name, 'sort_order' => 0]);
             }

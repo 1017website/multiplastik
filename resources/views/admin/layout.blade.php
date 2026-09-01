@@ -485,9 +485,12 @@
             <a href="{{ route('admin.brands.index') }}"
                 class="{{ request()->routeIs('admin.brands.*') ? 'active' : '' }}"><i class="fas fa-tags"></i>
                 Brand</a>
+            <a href="{{ route('admin.master-categories.index') }}"
+                class="{{ request()->routeIs('admin.master-categories.*') ? 'active' : '' }}"><i
+                    class="fas fa-sitemap"></i> Master Kategori</a>
             <a href="{{ route('admin.categories.index') }}"
                 class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"><i
-                    class="fas fa-layer-group"></i> Kategori</a>
+                    class="fas fa-layer-group"></i> Kategori Brand</a>
             <a href="{{ route('admin.products.index') }}"
                 class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}"><i class="fas fa-box-open"></i>
                 Produk</a>
@@ -541,6 +544,12 @@
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show mb-3">
                 <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show mb-3">
+                <i class="fas fa-circle-exclamation me-2"></i>{{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
