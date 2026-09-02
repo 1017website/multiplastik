@@ -126,21 +126,18 @@
         <div class="home-category-grid fu">
             @forelse ($masterCategories as $masterCategory)
                 @php
-                    $fallbackCategory = $masterCategory->activeCategories->first(fn ($category) => $category->image);
-                    $coverUrl = $masterCategory->image_url ?: $fallbackCategory?->image_url;
+                    $coverUrl = $masterCategory->image_url;
                     $categoryCount = $masterCategory->activeCategories->count();
                     $brandCount = $masterCategory->activeCategories->pluck('brand_id')->unique()->count();
                     $productCount = $masterCategory->activeCategories->sum('active_products_count');
                 @endphp
                 <a href="{{ route('site.master-category', $masterCategory->slug) }}"
                     class="home-category-card">
-                    <div class="home-category-image">
-                        @if ($coverUrl)
+                    @if ($coverUrl)
+                        <div class="home-category-image">
                             <img src="{{ $coverUrl }}" alt="{{ $masterCategory->name }}" loading="lazy">
-                        @elseif ($masterCategory->icon)
-                            <i class="{{ $masterCategory->icon }}" aria-hidden="true"></i>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                     <div class="home-category-body">
                         <span>Kategori Produk</span>
                         <h3>{{ $masterCategory->name }}</h3>
