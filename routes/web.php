@@ -59,6 +59,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         // Brands
+        Route::patch('brands/{brand}/visibility', [BrandController::class, 'updateVisibility'])
+            ->name('brands.visibility');
         Route::resource('brands', BrandController::class)->except('show');
 
         // Categories

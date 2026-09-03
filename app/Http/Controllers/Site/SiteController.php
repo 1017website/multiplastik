@@ -22,7 +22,7 @@ class SiteController extends Controller
         $slides = Slide::where('is_active', true)->orderBy('sort_order')->get();
         $promos = Promo::where('is_active', true)->orderBy('sort_order')->pluck('text')->toArray();
         $brands = $showBrandSection
-            ? Brand::where('is_active', true)
+            ? Brand::visibleOnFrontend()
                 ->withCount('activeCategories')
                 ->orderBy('sort_order')->get()
             : collect();
@@ -52,7 +52,7 @@ class SiteController extends Controller
 
     public function brands()
     {
-        $brands = Brand::where('is_active', true)
+        $brands = Brand::visibleOnFrontend()
             ->withCount('activeCategories')
             ->with(['activeCategories' => fn ($q) => $q->withCount('activeProducts')])
             ->orderBy('sort_order')->get();

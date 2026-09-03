@@ -31,12 +31,22 @@
                 <label class="form-label">Urutan</label>
                 <input type="number" name="sort_order" class="form-control" value="{{ old('sort_order', $brand->sort_order ?? 0) }}">
             </div>
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-12"><hr class="my-1"></div>
+            <div class="col-md-6">
                 <div class="form-check form-switch">
                     <input type="hidden" name="is_active" value="0">
-                    <input type="checkbox" name="is_active" value="1" class="form-check-input" id="is_active" {{ old('is_active', $brand->is_active ?? 1) ? 'checked' : '' }}>
-                    <label class="form-check-label" for="is_active">Aktif</label>
+                    <input type="checkbox" name="is_active" value="1" class="form-check-input" id="is_active" aria-describedby="is_active_help" {{ old('is_active', $brand->is_active ?? 1) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="is_active">Brand aktif</label>
                 </div>
+                <div class="form-text" id="is_active_help">Menonaktifkan brand akan menutup akses halaman brand, kategori, dan produknya.</div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check form-switch">
+                    <input type="hidden" name="show_on_frontend" value="0">
+                    <input type="checkbox" name="show_on_frontend" value="1" class="form-check-input" id="show_on_frontend" aria-describedby="show_on_frontend_help" {{ old('show_on_frontend', $brand->show_on_frontend ?? 1) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="show_on_frontend">Tampilkan di frontend</label>
+                </div>
+                <div class="form-text" id="show_on_frontend_help">Tampilkan brand di beranda, daftar brand, dan footer. Jika dimatikan, kategori dan produk tetap dapat diakses selama brand aktif.</div>
             </div>
         </div>
     </div>

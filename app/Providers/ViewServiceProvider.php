@@ -13,7 +13,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         // Share ke semua view yang berada di folder "site.*"
         View::composer('site.*', function ($view) {
-            $view->with('siteNavBrands', Brand::where('is_active', true)->orderBy('sort_order')->get());
+            $view->with('siteNavBrands', Brand::visibleOnFrontend()->orderBy('sort_order')->get());
         });
     }
 }

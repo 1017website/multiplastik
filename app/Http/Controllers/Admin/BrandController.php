@@ -26,6 +26,7 @@ class BrandController extends Controller
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
         $data['logo'] = $this->handleUpload($request, 'logo', 'brands');
         $data['is_active'] = $request->boolean('is_active');
+        $data['show_on_frontend'] = $request->boolean('show_on_frontend', true);
         Brand::create($data);
         return redirect()->route('admin.brands.index')->with('success', 'Brand ditambahkan.');
     }
@@ -42,8 +43,22 @@ class BrandController extends Controller
         $newLogo = $this->handleUpload($request, 'logo', 'brands');
         if ($newLogo) $data['logo'] = $newLogo;
         $data['is_active'] = $request->boolean('is_active');
+        $data['show_on_frontend'] = $request->boolean('show_on_frontend', $brand->show_on_frontend);
         $brand->update($data);
         return redirect()->route('admin.brands.index')->with('success', 'Brand diperbarui.');
+    }
+
+    public function updateVisibility(Request $request, Brand $brand)
+    {
+        $data = $request->validate([
+            'show_on_frontend' => 'required|boolean',
+        ]);
+
+        $brand->update($data);
+
+        return back()->with('success', $brand->show_on_frontend
+            ? 'Tampilan brand di frontend diaktifkan. Brand akan tampil jika statusnya aktif.'
+            : 'Brand disembunyikan dari daftar brand di frontend. Status kategori dan produk tidak berubah.');
     }
 
     public function destroy(Brand $brand)
@@ -62,6 +77,7 @@ class BrandController extends Controller
             'sort_order' => 'nullable|integer',
             'logo' => 'nullable|image|max:2048',
             'logo_url_manual' => 'nullable|string|max:500',
+            'show_on_frontend' => 'sometimes|boolean',
         ]);
     }
 

@@ -107,6 +107,7 @@ php artisan serve
 - **Promo Bar** — teks marquee berjalan
 - **News & Artikel** — CRUD artikel (konten HTML)
 - **Brand / Kategori / Produk** — katalog bertingkat, dengan spesifikasi & gallery
+- **Tampil di frontend per brand** — tombol di daftar Brand dan pengaturan di form tambah/edit untuk menampilkan atau menyembunyikan brand dari beranda, daftar brand, dan footer. Kategori, pencarian, dan halaman produk tetap tersedia selama brand aktif. Status **Brand aktif** tetap mengatur akses katalog; untuk brand yang sebelumnya dinonaktifkan hanya agar tidak tampil, aktifkan kembali brand lalu matikan **Tampilkan di frontend**.
 - **Site Settings** — Umum/SEO, Kontak, Section Tentang, Keunggulan, Hero Stats, Embed Sosmed, Analytics, Iklan
 - **User Admin** — kelola akun admin
 
@@ -128,6 +129,7 @@ https://multiplastik.com/?utm_source=meta&utm_medium=cpc&utm_campaign=promo-2025
 
 ## Catatan Teknis
 
+- **Update pengaturan tampilan brand**: jalankan `php artisan migrate --force` saat memasang pembaruan ini. Kolom `brands.show_on_frontend` baru bernilai aktif secara default agar tampilan brand lama tetap sama; migrasi tidak mengubah status aktif brand, kategori, atau produk.
 - **Upload gambar**: setiap form gambar bisa upload file ATAU paste URL (mis. Cloudinary). Data seed pakai URL Cloudinary yang sudah ada.
 - **Spesifikasi produk**: format per baris `Label|Value` (contoh: `Ukuran|12 Oz`).
 - **Link tombol slider**: `nav:brands`, `nav:brand:hok-cup`, `wa`, atau URL biasa.
